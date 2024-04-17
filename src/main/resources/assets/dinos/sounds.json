@@ -1,0 +1,21 @@
+{
+  "trex_step": {
+    "subtitle": "sounds.dinos.trex_step",
+    "sounds": [
+      "dinos:trex_step",
+      "dinos:trex_step_two",
+      "dinos:trex_step_three",
+      "dinos:trex_step_four",
+      "dinos:trex_step_five",
+      "dinos:trex_step_six",
+      "dinos:trex_step_seven"
+    ]
+  },
+  "dodo_ambient": {
+    "subtitle": "sounds.dinos.dodo_ambient",
+    "sounds": [
+      "dinos:dodo_ambient",
+      "dinos:dodo_ambient_two"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "item.dinos.dodo_spawn_egg": "Dodo Spawn Egg",
+  "item.dinos.trex_spawn_egg": "Tyrannosaurus Spawn Egg",
+  "item.dinos.compy_spawn_egg": "Compsognathusaurus Spawn Egg",
+  "item.dinos.raw_primal_meat": "Raw Primal Meat",
+  "item.dinos.cooked_primal_meat": "Cooked Primal Meat",
+  "entity.dinos.trex": "Tyrannosaurus",
+  "entity.dinos.dodo": "Dodo",
+  "entity.dinos.compy": "Compy",
+  "sounds.dinos.dodo_ambient": "Dodo sqeeks",
+  "sounds.dinos.trex_step": "Large stomp"
+}
