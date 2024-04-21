@@ -1,0 +1,12 @@
+{
+  "item.dinos.dodo_spawn_egg": "渡渡鸟刷怪蛋",
+  "item.dinos.trex_spawn_egg": "霸王龙刷怪蛋",
+  "item.dinos.compy_spawn_egg": "秀颚龙刷怪蛋",
+  "item.dinos.raw_primal_meat": "生原始肉",
+  "item.dinos.cooked_primal_meat": "熟原始肉",
+  "entity.dinos.trex": "霸王龙",
+  "entity.dinos.dodo": "渡渡鸟",
+  "entity.dinos.compy": "秀颚龙",
+  "sounds.dinos.dodo_ambient": "渡渡鸟：咯咯叫",
+  "sounds.dinos.trex_step": "霸王龙：重踏声"
+}
