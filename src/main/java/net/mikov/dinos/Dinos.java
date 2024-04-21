@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.CompyEntity;
+import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.mikov.dinos.entity.custom.TrexEntity;
 import net.mikov.dinos.entity.custom.DodoEntity;
 import net.mikov.dinos.item.ModItems;
@@ -32,6 +33,7 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.TREX, TrexEntity.createTrexAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.DODO, DodoEntity.createDodoAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.COMPY, CompyEntity.createCompyAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.DIMORPH, DimorphEntity.createDimorphAttributes());
 
 		ModWorldGen.generateWorldGen();
 

@@ -3,6 +3,7 @@ package net.mikov.dinos.entity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.mikov.dinos.Dinos;
 import net.mikov.dinos.entity.custom.CompyEntity;
+import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.mikov.dinos.entity.custom.DodoEntity;
 import net.mikov.dinos.entity.custom.TrexEntity;
 import net.minecraft.entity.EntityDimensions;
@@ -26,6 +27,11 @@ public class ModEntities {
     public static final EntityType<CompyEntity> COMPY = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "compy"),
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, CompyEntity::new)
+                    .dimensions(EntityDimensions.changing( 1f, 1f)).build());
+
+    public static final EntityType<DimorphEntity> DIMORPH = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "dimorph"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, DimorphEntity::new)
                     .dimensions(EntityDimensions.changing( 1f, 1f)).build());
 
 }

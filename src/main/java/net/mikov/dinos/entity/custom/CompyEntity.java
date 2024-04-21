@@ -38,7 +38,7 @@ import java.util.function.Predicate;
 public class CompyEntity extends TameableEntity implements Tameable {
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
-            (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON);
+            (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT);
 
     public static final Predicate<LivingEntity> FOLLOW_PREDICATE = entity -> {
         EntityType<?> entityType = entity.getType();

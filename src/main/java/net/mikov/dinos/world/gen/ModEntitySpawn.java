@@ -70,5 +70,28 @@ public class ModEntitySpawn {
         SpawnRestriction.register(ModEntities.COMPY, SpawnRestriction.Location.ON_GROUND,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 AnimalEntity::isValidNaturalSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.BADLANDS,
+                        BiomeKeys.BEACH,
+                        BiomeKeys.DESERT,
+                        BiomeKeys.ERODED_BADLANDS,
+                        BiomeKeys.SAVANNA,
+                        BiomeKeys.SAVANNA_PLATEAU,
+                        BiomeKeys.STONY_SHORE,
+                        BiomeKeys.WINDSWEPT_SAVANNA,
+                        BiomeKeys.WOODED_BADLANDS,
+                        BiomeKeys.FOREST,
+                        BiomeKeys.JUNGLE,
+                        BiomeKeys.SPARSE_JUNGLE,
+                        BiomeKeys.DARK_FOREST,
+                        BiomeKeys.OLD_GROWTH_BIRCH_FOREST,
+                        BiomeKeys.FLOWER_FOREST,
+                        BiomeKeys.RIVER ),
+                SpawnGroup.CREATURE,
+                ModEntities.DIMORPH, 70, 1, 3);
+        SpawnRestriction.register(ModEntities.DIMORPH, SpawnRestriction.Location.ON_GROUND,
+                Heightmap.Type.MOTION_BLOCKING,
+                AnimalEntity::isValidNaturalSpawn);
     }
 }

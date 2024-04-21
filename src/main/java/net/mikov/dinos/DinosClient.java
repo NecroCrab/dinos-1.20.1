@@ -19,5 +19,8 @@ public class DinosClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.COMPY, CompyRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.COMPY, CompyModel::getTexturedModelData);
 
+        EntityRendererRegistry.register(ModEntities.DIMORPH, DimorphRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.DIMORPH, DimorphModel::getTexturedModelData);
+
     }
 }
