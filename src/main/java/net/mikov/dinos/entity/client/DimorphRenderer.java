@@ -1,13 +1,11 @@
 package net.mikov.dinos.entity.client;
 
 import net.mikov.dinos.Dinos;
-import net.mikov.dinos.entity.custom.CompyEntity;
 import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -35,11 +33,11 @@ public class DimorphRenderer extends MobEntityRenderer<DimorphEntity, DimorphMod
         super.render(mobEntity, f, g, matrixStack, vertexConsumerProvider, i);
     }
 
-    @Override
+    /*@Override
     public float getAnimationProgress(DimorphEntity dimorphEntity, float f) {
         float g = MathHelper.lerp(f, dimorphEntity.prevFlapProgress, dimorphEntity.flapProgress);
         float h = MathHelper.lerp(f, dimorphEntity.prevMaxWingDeviation, dimorphEntity.maxWingDeviation);
         return (MathHelper.sin(g) + 1.0f) * h;
-    }
+    }*/
 
 }

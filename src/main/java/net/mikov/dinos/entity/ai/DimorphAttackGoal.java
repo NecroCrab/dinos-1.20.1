@@ -1,6 +1,5 @@
 package net.mikov.dinos.entity.ai;
 
-import net.mikov.dinos.entity.custom.CompyEntity;
 import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
@@ -63,7 +62,7 @@ public class DimorphAttackGoal extends MeleeAttackGoal {
     }
 
     private boolean isEnemyWithinAttackDistance(LivingEntity pEnemy) {
-        return this.entity.distanceTo(pEnemy) <= 2f; // TODO
+        return this.entity.distanceTo(pEnemy) <= 2.5f; // TODO
     }
 
     protected void resetAttackCooldown() {

@@ -3,6 +3,7 @@ package net.mikov.dinos.entity.custom;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.ai.DimorphAttackGoal;
 import net.mikov.dinos.entity.animation.ModAnimations;
+import net.mikov.dinos.entity.client.DimorphModel;
 import net.mikov.dinos.item.ModItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -20,10 +21,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -44,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.function.Predicate;
 
-public class DimorphEntity extends TameableEntity implements Tameable, Flutterer {
+public class DimorphEntity extends TameableEntity implements Tameable {
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT);
@@ -72,42 +71,63 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
     public float maxWingDeviation;
     public float prevMaxWingDeviation;
     public float prevFlapProgress;
-    private float flapSpeed = 1.0f;
-    private float field_28640 = 1.0f;
+    private float flapSpeed = 0.0f;
+    private float field_28640 = 0.0f;
 
     public DimorphEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
         this.setTamed(false);
-        this.moveControl = new FlightMoveControl(this, 10, false);
-        //this.moveControl = new DimorphEntity.DimorphMoveControl(this);
+        this.moveControl = new FlightMoveControl(this, 5, false);
     }
 
     private void setupAnimationStates() {
-        if (this.isOnGround() && !this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
-            --this.flyingAnimationTimeout;
-            this.idleAnimationTimeout = this.random.nextInt(80) + 80;
+        if (/*this.isOnGround() &&*/ !this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
+            this.idleAnimationTimeout = 160;
             this.idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
+            if (/*this.isOnGround() &&*/ this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0) {
+                walkingAnimationTimeout = 40;
+                walkingAnimationState.start(this.age);
+            } else {
+                --this.walkingAnimationTimeout;
+                if (/*!this.isOnGround() &&*/ this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
+                    flyingAnimationTimeout = 80;
+                    flyingAnimationState.start(this.age);
+                } else {
+                    --this.flyingAnimationTimeout;
+                    if (this.moveControl.isMoving()) {
+                        --this.idleAnimationTimeout;
+                    }
+                }
+            }
         }
-        if (this.isOnGround() && this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0) {
-            --this.flyingAnimationTimeout;
-            --this.idleAnimationTimeout;
+        /*if (!this.isOnGround()) {
+            idleAnimationState.stop();
+        }*/
+        /*if (!this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
+            this.idleAnimationTimeout = 80;
+            this.idleAnimationState.start(this.age);
+        }*/
+        /*if (this.isOnGround() && this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0) {
             walkingAnimationTimeout = 40;
             walkingAnimationState.start(this.age);
         } else {
             --this.walkingAnimationTimeout;
-        }
-        if (this.isInAir() && this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
-            --this.idleAnimationTimeout;
+        }*/
+        /*if (!this.isOnGround()) {
+            walkingAnimationState.stop();
+            idleAnimationState.stop();
+        }*/
+        /*if (this.isInAir() && this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
             flyingAnimationTimeout = 80;
             flyingAnimationState.start(this.age);
         } else {
             --this.flyingAnimationTimeout;
-        }
-        if(!this.isInAir()) {
+        }*/
+        /*if(!this.isInAir()) {
             flyingAnimationState.stop();
-        }
+        }*/
         /*if (this.isSitting() && sittingAnimationTimeout <= 0) {
             sittingAnimationTimeout = 400;
             sittingAnimationState.start(this.age);
@@ -145,11 +165,11 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
         float f = this.getPose() == EntityPose.STANDING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
         this.limbAnimator.updateLimbs(f, 0.2f);
 
-        /*float u = this.getPose() == EntityPose.FALL_FLYING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
+        float u = this.getPose() == EntityPose.FALL_FLYING ? Math.min(posDelta * 6.0f, 8.0f) : 0.0f;
         this.limbAnimator.updateLimbs(u, 0.2f);
 
         float s = this.getPose() == EntityPose.SITTING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
-        this.limbAnimator.updateLimbs(s, 0.2f);*/
+        this.limbAnimator.updateLimbs(s, 0.2f);
     }
 
     @Override
@@ -170,8 +190,9 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
         this.goalSelector.add(5, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
         this.goalSelector.add(6, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(7, new DimorphAttackGoal(this, 1.15, true));
-        this.goalSelector.add(8, new DimorphEntity.FlyOntoTreeGoal(this, 1.0));
-        this.goalSelector.add(9, new DimorphEntity.FlyRandomlyGoal(this));
+        this.goalSelector.add(8, new FlyOntoTreeGoal(this, 1.0));
+        this.goalSelector.add(9, new FlyRandomlyGoal(this));
+        this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
         this.goalSelector.add(10, new LookAroundGoal(this));
 
@@ -189,8 +210,8 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
     public static DefaultAttributeContainer.Builder createDimorphAttributes() {
         return TameableEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 12)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3)
-                .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.4)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
+                .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.5)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 0)
@@ -388,9 +409,9 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
 
     //flying
 
-    public boolean isInAir() {
+    /*public boolean isInAir() {
         return !this.isOnGround();
-    }
+    }*/
 
     @Override
     protected EntityNavigation createNavigation(World world) {
@@ -401,7 +422,7 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
         return birdNavigation;
     }
 
-    /*@Override
+    @Override
     public void tickMovement() {
         super.tickMovement();
         this.flapWings();
@@ -432,49 +453,11 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
     protected void addFlapEffects() {
         this.playSound(SoundEvents.ENTITY_PARROT_FLY, 0.15f, 1.0f);
         this.field_28640 = this.speed + this.maxWingDeviation / 2.0f;
-    }*/
+    }
 
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition) {
     }
-
-    /*static class DimorphMoveControl
-            extends MoveControl {
-        private final DimorphEntity dimorph;
-        private int collisionCheckCooldown;
-
-        public DimorphMoveControl(DimorphEntity dimorph) {
-            super(dimorph);
-            this.dimorph = dimorph;
-        }
-
-        @Override
-        public void tick() {
-            if (this.state != MoveControl.State.MOVE_TO) {
-                return;
-            }
-            if (this.collisionCheckCooldown-- <= 0) {
-                this.collisionCheckCooldown += this.dimorph.getRandom().nextInt(5) + 2;
-                Vec3d vec3d = new Vec3d(this.targetX - this.dimorph.getX(), this.targetY - this.dimorph.getY(), this.targetZ - this.dimorph.getZ());
-                double d = vec3d.length();
-                if (this.willCollide(vec3d = vec3d.normalize(), MathHelper.ceil(d))) {
-                    this.dimorph.setVelocity(this.dimorph.getVelocity().add(vec3d.multiply(0.1)));
-                } else {
-                    this.state = MoveControl.State.WAIT;
-                }
-            }
-        }
-
-        private boolean willCollide(Vec3d direction, int steps) {
-            Box box = this.dimorph.getBoundingBox();
-            for (int i = 1; i < steps; ++i) {
-                box = box.offset(direction);
-                if (this.dimorph.getWorld().isSpaceEmpty(this.dimorph, box)) continue;
-                return false;
-            }
-            return true;
-        }
-    }*/
 
     static class FlyRandomlyGoal
             extends Goal {
@@ -482,7 +465,7 @@ public class DimorphEntity extends TameableEntity implements Tameable, Flutterer
 
         public FlyRandomlyGoal(DimorphEntity dimorph) {
             this.dimorph = dimorph;
-            this.setControls(EnumSet.of(Goal.Control.MOVE));
+            this.setControls(EnumSet.of(Control.MOVE));
         }
 
         @Override

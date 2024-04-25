@@ -1,7 +1,5 @@
 package net.mikov.dinos.entity.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.mikov.dinos.entity.animation.ModAnimations;
 import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.minecraft.client.model.*;
@@ -50,8 +48,8 @@ public class DimorphModel<T extends DimorphEntity> extends SinglePartEntityModel
 	public DimorphModel(ModelPart root) {
 		this.controller = root.getChild("controller");
 		this.head = controller.getChild( "mainbody").getChild( "upperbody").getChild( "head");
-		this.wingL = controller.getChild( "mainbody").getChild( "upperbody").getChild( "wingL");
-		this.wingR = controller.getChild( "mainbody").getChild( "upperbody").getChild( "wingR");
+		this.wingL = controller.getChild( "mainbody").getChild( "upperbody").getChild( "wingL").getChild( "upperwingL").getChild( "lowerwingL").getChild( "tipwingL");
+		this.wingR = controller.getChild( "mainbody").getChild( "upperbody").getChild( "wingR").getChild( "upperwingR").getChild( "lowerwingR").getChild( "tipwingR");
 	}
 
 	public static TexturedModelData getTexturedModelData() {
@@ -125,7 +123,7 @@ public class DimorphModel<T extends DimorphEntity> extends SinglePartEntityModel
 		this.setHeadAngles(netHeadYaw, headPitch);
 
 		//this.animateMovement(ModAnimations.DIMORPH_WALK, limbSwing, limbSwingAmount, 2f, 4.5f);
-		this.animateMovement(ModAnimations.DIMORPH_FLYING, limbSwing, limbSwingAmount, 2f, 0f);
+		this.animateMovement(ModAnimations.DIMORPH_FLYING, limbSwing, limbSwingAmount, 2f, 4.5f);
 		this.updateAnimation(entity.flyingAnimationState, ModAnimations.DIMORPH_FLYING, ageInTicks, 1f);
 		this.updateAnimation(entity.idleAnimationState, ModAnimations.DIMORPH_IDLE, ageInTicks, 1f);
 		//this.updateAnimation(entity.sittingAnimationState, ModAnimations.DIMORPH_SITTING, ageInTicks, 1f);
@@ -150,25 +148,4 @@ public class DimorphModel<T extends DimorphEntity> extends SinglePartEntityModel
 	public ModelPart getPart() {
 		return controller;
 	}
-
-	/*private static Pose getPose(DimorphEntity dimorph) {
-		if (dimorph.isInSittingPose()) {
-			return DimorphModel.Pose.DIMORPH_SITTING;
-		}
-		if (dimorph.isInAir()) {
-			return DimorphModel.Pose.DIMORPH_FLYING;
-		}
-		return DimorphModel.Pose.DIMORPH_IDLE;
-	}
-
-	@Environment(value= EnvType.CLIENT)
-	public static enum Pose {
-		DIMORPH_FLYING,
-		DIMORPH_IDLE,
-		DIMORPH_SITTING,
-		PARTY,
-		ON_SHOULDER;
-
-	}*/
-
 }

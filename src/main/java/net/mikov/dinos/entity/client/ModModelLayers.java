@@ -16,4 +16,7 @@ public class ModModelLayers {
 
     public static final EntityModelLayer DIMORPH =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "dimorph"), "main");
+
+    public static final EntityModelLayer COEL =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "coel"), "main");
 }

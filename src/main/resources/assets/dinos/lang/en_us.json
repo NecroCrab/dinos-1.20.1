@@ -3,12 +3,17 @@
   "item.dinos.trex_spawn_egg": "Tyrannosaurus Spawn Egg",
   "item.dinos.compy_spawn_egg": "Compsognathusaurus Spawn Egg",
   "item.dinos.dimorph_spawn_egg": "Dimorphodon Spawn Egg",
+  "item.dinos.coel_spawn_egg": "Coelacanth Spawn Egg",
   "item.dinos.raw_primal_meat": "Raw Primal Meat",
   "item.dinos.cooked_primal_meat": "Cooked Primal Meat",
+  "item.dinos.raw_coel": "Raw Coelacanth",
+  "item.dinos.cooked_coel": "Cooked Coelacanth",
+  "item.dinos.coel_bucket": "Bucket o' Coelacanth",
   "entity.dinos.trex": "Tyrannosaurus",
   "entity.dinos.dodo": "Dodo",
   "entity.dinos.compy": "Compy",
   "entity.dinos.dimorph": "Dimorphodon",
+  "entity.dinos.coel": "Coelacanth",
   "sounds.dinos.dodo_ambient": "Dodo sqeeks",
   "sounds.dinos.trex_step": "Large stomp"
 }
