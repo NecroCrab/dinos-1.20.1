@@ -1,0 +1,9 @@
+{
+    "type": "minecraft:smelting",
+    "ingredient": {
+        "item": "dinos:raw_coel"
+    },
+    "result": "dinos:cooked_coel",
+    "experience": 1.1,
+    "cookingtime": 400
+}
