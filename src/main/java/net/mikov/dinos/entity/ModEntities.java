@@ -36,4 +36,9 @@ public class ModEntities {
             FabricEntityTypeBuilder.create(SpawnGroup.WATER_AMBIENT, CoelEntity::new)
                     .dimensions(EntityDimensions.changing( 1f, 1f)).build());
 
+    public static final EntityType<AnkyEntity> ANKY = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "anky"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, AnkyEntity::new)
+                    .dimensions(EntityDimensions.changing( 2.5f, 1.25f)).build());
+
 }

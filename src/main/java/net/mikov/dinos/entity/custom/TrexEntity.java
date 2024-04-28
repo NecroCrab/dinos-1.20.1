@@ -48,6 +48,8 @@ public class TrexEntity extends AnimalEntity {
     private int idleAnimationTimeout = 0;
     public static final AnimationState attackingAnimationState = new AnimationState();
     public int attackingAnimationTimeout = 0;
+    public static final AnimationState roaringAnimationState = new AnimationState();
+    public int roaringAnimationTimeout = 0;
 
     public static final Predicate<LivingEntity> FOLLOW_PREDICATE = entity -> {
         EntityType<?> entityType = entity.getType();
@@ -73,6 +75,7 @@ public class TrexEntity extends AnimalEntity {
                 entityType == EntityType.WANDERING_TRADER ||
                 entityType == EntityType.WITCH ||
                 entityType == ModEntities.DODO ||
+                entityType == ModEntities.ANKY ||
                 entityType == EntityType.PIG;
     };
 
@@ -92,10 +95,17 @@ public class TrexEntity extends AnimalEntity {
             attackingAnimationTimeout = 40;
             attackingAnimationState.start(this.age);
         } else {
+            /*if (this.isAttacking() && !this.isInWalkTargetRange() && roaringAnimationTimeout <= 0) {
+                roaringAnimationTimeout = 100;
+                roaringAnimationState.start(this.age);
+            } else {
+                --this.roaringAnimationTimeout;
+            }*/
             --this.attackingAnimationTimeout;
         }
         if(!this.isAttacking()) {
             attackingAnimationState.stop();
+            //roaringAnimationState.stop();
         }
 
     }

@@ -82,7 +82,7 @@ public class DimorphEntity extends TameableEntity implements Tameable {
 
     private void setupAnimationStates() {
         if (/*this.isOnGround() &&*/ !this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = 160;
+            this.idleAnimationTimeout = this.random.nextInt(1180) + 80;
             this.idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
@@ -183,7 +183,6 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     @Override
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(1, new EscapeDangerGoal(this, 1.2));
         this.goalSelector.add(2, new SitGoal(this));
         this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
         this.goalSelector.add(4, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));

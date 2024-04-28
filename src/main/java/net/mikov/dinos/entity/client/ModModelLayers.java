@@ -19,4 +19,7 @@ public class ModModelLayers {
 
     public static final EntityModelLayer COEL =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "coel"), "main");
+
+    public static final EntityModelLayer ANKY =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "anky"), "main");
 }

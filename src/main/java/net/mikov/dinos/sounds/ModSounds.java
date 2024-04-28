@@ -9,7 +9,10 @@ import net.minecraft.util.Identifier;
 public class ModSounds {
 
     public static SoundEvent TREX_STEP = registerSound("trex_step");
+    public static SoundEvent TREX_ATTACK = registerSound("trex_attack");
     public static SoundEvent DODO_AMBIENT = registerSound("dodo_ambient");
+    public static SoundEvent ANKY_AMBIENT = registerSound("anky_ambient");
+    public static SoundEvent ANKY_DEATH = registerSound("anky_death");
 
     static SoundEvent registerSound(String id) {
         SoundEvent sound = SoundEvent.of(new Identifier(Dinos.MOD_ID, id));

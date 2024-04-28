@@ -14,10 +14,12 @@ public class TrexModel<T extends TrexEntity> extends SinglePartEntityModel<T> {
 
 	private final ModelPart Trex;
 	private final ModelPart head;
+	//private final ModelPart tail;
 
 	public TrexModel(ModelPart root) {
 		this.Trex = root.getChild("Trex");
 		this.head = Trex.getChild("mainbody").getChild("upperbody").getChild("neck").getChild("head");
+		//this.tail = Trex.getChild("mainbody").getChild("tail").getChild("start").getChild("mid").getChild("edge").getChild("tip");
 	}
 	public static TexturedModelData getTexturedModelData() {
 		ModelData modelData = new ModelData();
@@ -199,6 +201,7 @@ public class TrexModel<T extends TrexEntity> extends SinglePartEntityModel<T> {
 		this.animateMovement(ModAnimations.WALK, limbSwing, limbSwingAmount, 2f, 25.5f);
 		this.updateAnimation(entity.idleAnimationState, ModAnimations.IDLE, ageInTicks, 1f);
 		this.updateAnimation(entity.attackingAnimationState, ModAnimations.TREX_ATTACK, ageInTicks, 1f);
+		this.updateAnimation(entity.roaringAnimationState, ModAnimations.ROAR, ageInTicks, 1f);
 
 	}
 

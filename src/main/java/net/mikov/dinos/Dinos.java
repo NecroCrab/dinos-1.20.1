@@ -2,13 +2,19 @@ package net.mikov.dinos;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.*;
 import net.mikov.dinos.item.ModItems;
+import net.mikov.dinos.registry.FishingLoot;
 import net.mikov.dinos.sounds.ModSounds;
 import net.mikov.dinos.world.gen.ModEntitySpawn;
 import net.mikov.dinos.world.gen.ModWorldGen;
+import net.minecraft.loot.LootPool;
+import net.minecraft.loot.LootTables;
+import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +38,10 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.COMPY, CompyEntity.createCompyAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.DIMORPH, DimorphEntity.createDimorphAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.COEL, CoelEntity.createCoelAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.ANKY, AnkyEntity.createAnkyAttributes());
 
 		ModWorldGen.generateWorldGen();
-
+		FishingLoot.registerFishingLoot();
 		ModItems.registerModItems();
 		ModSounds.registerSounds();
 	}

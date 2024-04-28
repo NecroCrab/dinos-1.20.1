@@ -11,11 +11,30 @@
       "dinos:trex_step_seven"
     ]
   },
+  "trex_attack": {
+    "subtitle": "sounds.dinos.trex_attack",
+    "sounds": [
+      "dinos:bite-sound",
+      "dinos:bite-two"
+    ]
+  },
   "dodo_ambient": {
     "subtitle": "sounds.dinos.dodo_ambient",
     "sounds": [
       "dinos:dodo_ambient",
       "dinos:dodo_ambient_two"
+    ]
+  },
+  "anky_ambient": {
+    "subtitle": "sounds.dinos.anky_ambient",
+    "sounds": [
+      "dinos:anky_ambient"
+    ]
+  },
+  "anky_death": {
+    "subtitle": "sounds.dinos.anky_death",
+    "sounds": [
+      "dinos:anky_death"
     ]
   }
 }

@@ -1,8 +1,8 @@
 package net.mikov.dinos.entity.custom;
 
 import net.mikov.dinos.entity.ModEntities;
+import net.mikov.dinos.entity.ai.AnkyAttackGoal;
 import net.mikov.dinos.entity.ai.CompyAttackGoal;
-import net.mikov.dinos.entity.ai.TrexAttackGoal;
 import net.mikov.dinos.item.ModItems;
 import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.block.BlockState;
@@ -18,7 +18,6 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -26,8 +25,6 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
@@ -35,17 +32,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-public class CompyEntity extends TameableEntity implements Tameable {
+public class AnkyEntity extends TameableEntity implements Tameable {
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
-            (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT);
+            (Items.MELON, Items.PUMPKIN, Items.SWEET_BERRIES);
 
     public static final Predicate<LivingEntity> FOLLOW_PREDICATE = entity -> {
         EntityType<?> entityType = entity.getType();
-        return entityType == EntityType.CHICKEN ||
-                entityType == ModEntities.DODO ||
-                entityType == EntityType.RABBIT ||
-                entityType == EntityType.FROG;
+        return entityType == ModEntities.TREX;
     };
 
     public static final AnimationState idleAnimationState = new AnimationState();
@@ -55,7 +49,7 @@ public class CompyEntity extends TameableEntity implements Tameable {
     public static final AnimationState attackingAnimationState = new AnimationState();
     public int attackingAnimationTimeout = 0;
 
-    public CompyEntity(EntityType<? extends TameableEntity> entityType, World world) {
+    public AnkyEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
         this.setTamed(false);
     }
@@ -68,7 +62,7 @@ public class CompyEntity extends TameableEntity implements Tameable {
             --this.idleAnimationTimeout;
         }
         /*if (this.isSitting() && sittingAnimationTimeout <= 0) {
-            sittingAnimationTimeout = 400;
+            sittingAnimationTimeout = 40;
             sittingAnimationState.start(this.age);
         } else {
             --this.sittingAnimationTimeout;
@@ -88,7 +82,7 @@ public class CompyEntity extends TameableEntity implements Tameable {
     }
 
     private static final TrackedData<Boolean> ATTACKING =
-            DataTracker.registerData(CompyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+            DataTracker.registerData(AnkyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     public boolean isAttacking() {
         return this.dataTracker.get(ATTACKING);
@@ -121,14 +115,14 @@ public class CompyEntity extends TameableEntity implements Tameable {
         this.goalSelector.add(4, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
         this.goalSelector.add(5, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
         this.goalSelector.add(6, new FollowParentGoal(this, 1.1));
-        this.goalSelector.add(7, new CompyAttackGoal(this, 1.15, true));
+        this.goalSelector.add(7, new AnkyAttackGoal(this, 1.15, true));
         this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
         this.goalSelector.add(10, new LookAroundGoal(this));
 
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(CompyEntity.class));
+        this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(AnkyEntity.class));
         this.targetSelector.add(4, new UntamedActiveTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, FOLLOW_PREDICATE));
     }
 
@@ -137,17 +131,17 @@ public class CompyEntity extends TameableEntity implements Tameable {
         return this.isBaby() ? dimensions.height * 0.85f : dimensions.height * 0.92f;
     }
 
-    public static DefaultAttributeContainer.Builder createCompyAttributes() {
+    public static DefaultAttributeContainer.Builder createAnkyAttributes() {
         return TameableEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 12)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
-                .add(EntityAttributes.GENERIC_ARMOR, 0)
-                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 0.5)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 120)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.1)
+                .add(EntityAttributes.GENERIC_ARMOR, 8)
+                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 8)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 10)
                 .add(EntityAttributes.HORSE_JUMP_STRENGTH, 1)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 12);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 18);
 
     }
 
@@ -159,28 +153,28 @@ public class CompyEntity extends TameableEntity implements Tameable {
     @Nullable
     @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return ModEntities.COMPY.create(world);
+        return ModEntities.ANKY.create(world);
         //return null;
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_AXOLOTL_IDLE_AIR;
+        return ModSounds.ANKY_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_AXOLOTL_HURT;
+        return SoundEvents.ENTITY_CAMEL_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_AXOLOTL_DEATH;
+        return ModSounds.ANKY_DEATH;
     }
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.ENTITY_CHICKEN_STEP, 0.15f, 1.0f);
+        this.playSound(SoundEvents.ENTITY_IRON_GOLEM_STEP, 0.5f, 1.0f);
     }
 
     //taming
@@ -277,12 +271,12 @@ public class CompyEntity extends TameableEntity implements Tameable {
     public void setTamed(boolean tamed) {
         super.setTamed(tamed);
         if (tamed) {
-            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(20.0);
+            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(200.0);
             this.setHealth(20.0f);
         } else {
-            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(12.0);
+            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(120.0);
         }
-        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(2.0);
+        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(8.0);
     }
 
     /*@Override
@@ -307,7 +301,7 @@ public class CompyEntity extends TameableEntity implements Tameable {
     }*/
 
     private static final TrackedData<Boolean> SITTING =
-            DataTracker.registerData(CompyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+            DataTracker.registerData(AnkyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     public boolean isSitting() {
         return this.dataTracker.get(SITTING);

@@ -4,6 +4,7 @@
   "item.dinos.compy_spawn_egg": "Compsognathusaurus Spawn Egg",
   "item.dinos.dimorph_spawn_egg": "Dimorphodon Spawn Egg",
   "item.dinos.coel_spawn_egg": "Coelacanth Spawn Egg",
+  "item.dinos.anky_spawn_egg": "Ankylosaurus Spawn Egg",
   "item.dinos.raw_primal_meat": "Raw Primal Meat",
   "item.dinos.cooked_primal_meat": "Cooked Primal Meat",
   "item.dinos.raw_coel": "Raw Coelacanth",
@@ -14,6 +15,9 @@
   "entity.dinos.compy": "Compy",
   "entity.dinos.dimorph": "Dimorphodon",
   "entity.dinos.coel": "Coelacanth",
+  "entity.dinos.anky": "Ankylosaurus",
   "sounds.dinos.dodo_ambient": "Dodo sqeeks",
+  "sounds.dinos.anky_ambient": "Ankylo Grunts",
+  "sounds.dinos.anky_death": "Ankylo Dies",
   "sounds.dinos.trex_step": "Large stomp"
 }

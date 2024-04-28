@@ -1,25 +1,23 @@
 package net.mikov.dinos.entity.ai;
 
-import net.mikov.dinos.entity.custom.CompyEntity;
-import net.mikov.dinos.entity.custom.TrexEntity;
+import net.mikov.dinos.entity.custom.AnkyEntity;
 import net.mikov.dinos.sounds.ModSounds;
-import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 
-public class TrexAttackGoal extends MeleeAttackGoal {
+public class AnkyAttackGoal extends MeleeAttackGoal {
 
-    private final TrexEntity entity;
+    private final AnkyEntity entity;
     private int attackDelay = 20;
     private int ticksUntilNextAttack = 20;
     private boolean shouldCountTillNextAttack = false;
 
-    public TrexAttackGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
+    public AnkyAttackGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
         super(mob, speed, pauseWhenMobIdle);
-        entity = ((TrexEntity) mob);
+        entity = ((AnkyEntity) mob);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TrexAttackGoal extends MeleeAttackGoal {
             if(isTimeToAttack()) {
                 this.mob.getLookControl().lookAt(pEnemy.getX(), pEnemy.getEyeY(), pEnemy.getZ());
                 performAttack(pEnemy);
-                entity.playSound(ModSounds.TREX_ATTACK, 1.0f, entity.getSoundPitch());
+                entity.playSound(SoundEvents.BLOCK_ANVIL_BREAK, 1.0f, entity.getSoundPitch());
             }
         } else {
             resetAttackCooldown();
@@ -67,7 +65,7 @@ public class TrexAttackGoal extends MeleeAttackGoal {
     }
 
     private boolean isEnemyWithinAttackDistance(LivingEntity pEnemy) {
-        return this.entity.distanceTo(pEnemy) <= 8f; // TODO
+        return this.entity.distanceTo(pEnemy) <= 5f; // TODO
     }
 
     protected void resetAttackCooldown() {

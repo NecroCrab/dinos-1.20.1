@@ -26,6 +26,8 @@ public class ModItems {
             new SpawnEggItem(ModEntities.DIMORPH, 0x957256, 0x0F0F0F, new FabricItemSettings()));
     public static final Item COEL_SPAWN_EGG = registerItem( "coel_spawn_egg",
             new SpawnEggItem(ModEntities.COEL, 0xA1A1A1, 0xF9F9F9, new FabricItemSettings()));
+    public static final Item ANKY_SPAWN_EGG = registerItem( "anky_spawn_egg",
+            new SpawnEggItem(ModEntities.ANKY, 0x957256, 0xA1A1A1, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -49,6 +51,7 @@ public class ModItems {
         entries.add(COMPY_SPAWN_EGG);
         entries.add(DIMORPH_SPAWN_EGG);
         entries.add(COEL_SPAWN_EGG);
+        entries.add(ANKY_SPAWN_EGG);
     }
 
     private static Item registerItem(String name, Item item) {

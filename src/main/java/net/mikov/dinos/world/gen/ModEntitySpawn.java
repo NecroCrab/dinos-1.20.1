@@ -108,15 +108,35 @@ public class ModEntitySpawn {
                         BiomeKeys.COLD_OCEAN,
                         BiomeKeys.DEEP_COLD_OCEAN,
                         BiomeKeys.DEEP_FROZEN_OCEAN,
+                        BiomeKeys.FROZEN_OCEAN,
                         BiomeKeys.DEEP_OCEAN,
                         BiomeKeys.DEEP_LUKEWARM_OCEAN,
                         BiomeKeys.LUKEWARM_OCEAN,
                         BiomeKeys.OCEAN,
                         BiomeKeys.FROZEN_RIVER),
                 SpawnGroup.WATER_AMBIENT,
-                ModEntities.COEL, 190, 1, 8);
+                ModEntities.COEL, 290, 1, 8);
         SpawnRestriction.register(ModEntities.COEL, SpawnRestriction.Location.IN_WATER,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 CoelEntity::canSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.PLAINS,
+                        BiomeKeys.BADLANDS,
+                        BiomeKeys.BEACH,
+                        BiomeKeys.DESERT,
+                        BiomeKeys.ERODED_BADLANDS,
+                        BiomeKeys.SAVANNA,
+                        BiomeKeys.SAVANNA_PLATEAU,
+                        BiomeKeys.SPARSE_JUNGLE,
+                        BiomeKeys.STONY_SHORE,
+                        BiomeKeys.WINDSWEPT_SAVANNA,
+                        BiomeKeys.WOODED_BADLANDS,
+                        BiomeKeys.RIVER ),
+                SpawnGroup.CREATURE,
+                ModEntities.ANKY, 60, 1, 4);
+        SpawnRestriction.register(ModEntities.ANKY, SpawnRestriction.Location.ON_GROUND,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                AnimalEntity::isValidNaturalSpawn);
     }
 }
