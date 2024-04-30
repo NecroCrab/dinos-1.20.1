@@ -60,6 +60,8 @@ public class ModItems {
 
     public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
         entries.add(ModBlocks.TRILOBITE_EGG_BLOCK);
+        entries.add(ModBlocks.DODO_EGG_BLOCK);
+        entries.add(ModBlocks.COMPY_EGG_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {

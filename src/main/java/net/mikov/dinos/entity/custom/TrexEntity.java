@@ -46,12 +46,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 
 public class TrexEntity extends AbstractDonkeyEntity
@@ -178,16 +180,16 @@ public class TrexEntity extends AbstractDonkeyEntity
         }
 
         if (!this.isTame()) {
-        this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(TrexEntity.class));
-        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
-        this.targetSelector.add(3, new ActiveTargetGoal<MerchantEntity>((MobEntity)this, MerchantEntity.class, true));
-        this.targetSelector.add(4, new ActiveTargetGoal<IronGolemEntity>((MobEntity)this, IronGolemEntity.class, true));
-        this.targetSelector.add(5, new ActiveTargetGoal<>(this, LivingEntity.class, true, FOLLOW_PREDICATE));
+            this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(TrexEntity.class));
+            this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>((MobEntity) this, PlayerEntity.class, true));
+            this.targetSelector.add(3, new ActiveTargetGoal<MerchantEntity>((MobEntity) this, MerchantEntity.class, true));
+            this.targetSelector.add(4, new ActiveTargetGoal<IronGolemEntity>((MobEntity) this, IronGolemEntity.class, true));
+            this.targetSelector.add(5, new ActiveTargetGoal<>(this, LivingEntity.class, true, FOLLOW_PREDICATE));
         }
     }
 
     public static DefaultAttributeContainer.Builder createTrexAttributes() {
-        return AbstractDonkeyEntity.createMobAttributes()
+        return AbstractDonkeyEntity.createBaseHorseAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 200)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
@@ -201,13 +203,22 @@ public class TrexEntity extends AbstractDonkeyEntity
     }
 
     @Override
+    protected void initAttributes(Random random) {
+        this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(TrexEntity.getChildHealthBonus(random::nextInt));
+    }
+
+    protected static float getChildHealthBonus(IntUnaryOperator randomIntGetter) {
+        return 200.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
+    }
+
+    @Override
     public boolean isBreedingItem(ItemStack stack) {
         return BREEDING_INGREDIENT.test(stack);
     }
 
     @Nullable
     @Override
-    public AnimalEntity createChild(ServerWorld world, PassiveEntity entity) {
+    public AbstractDonkeyEntity createChild(ServerWorld world, PassiveEntity entity) {
         return ModEntities.TREX.create(world);
     }
 

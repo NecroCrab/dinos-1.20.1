@@ -32,18 +32,14 @@ import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class TrilobiteEggBlock extends Block {
-    public static final int field_31272 = 2;
-    public static final int field_31273 = 1;
-    public static final int field_31274 = 4;
     private static final VoxelShape SMALL_SHAPE = Block.createCuboidShape(3.0, 0.0, 3.0, 12.0, 7.0, 12.0);
     private static final VoxelShape LARGE_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 7.0, 15.0);
     public static final IntProperty HATCH = Properties.HATCH;
-    //public static final IntProperty EGGS = Properties.EGGS;
-    public static final IntProperty EGGS = IntProperty.of("eggs", 1, 4);
+    public static final IntProperty EGGS = Properties.EGGS;
 
     public TrilobiteEggBlock(AbstractBlock.Settings settings) {
         super(settings);
-        this.setDefaultState((BlockState)((BlockState)((BlockState)this.stateManager.getDefaultState()).with(HATCH, 0)).with(EGGS, 1));
+        this.setDefaultState(this.stateManager.getDefaultState().with(HATCH, 0).with(EGGS, 1));
     }
 
     @Override
@@ -77,7 +73,7 @@ public class TrilobiteEggBlock extends Block {
         if (i <= 1) {
             world.breakBlock(pos, false);
         } else {
-            world.setBlockState(pos, (BlockState)state.with(EGGS, i - 1), Block.NOTIFY_LISTENERS);
+            world.setBlockState(pos, state.with(EGGS, i - 1), Block.NOTIFY_LISTENERS);
             world.emitGameEvent(GameEvent.BLOCK_DESTROY, pos, GameEvent.Emitter.of(state));
             world.syncWorldEvent(WorldEvents.BLOCK_BROKEN, pos, Block.getRawIdFromState(state));
         }
@@ -89,7 +85,7 @@ public class TrilobiteEggBlock extends Block {
             int i = state.get(HATCH);
             if (i < 2) {
                 world.playSound(null, pos, SoundEvents.ENTITY_TURTLE_EGG_CRACK, SoundCategory.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
-                world.setBlockState(pos, (BlockState)state.with(HATCH, i + 1), Block.NOTIFY_LISTENERS);
+                world.setBlockState(pos, state.with(HATCH, i + 1), Block.NOTIFY_LISTENERS);
             } else {
                 world.playSound(null, pos, SoundEvents.ENTITY_TURTLE_EGG_HATCH, SoundCategory.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
                 world.removeBlock(pos, false);
@@ -123,7 +119,7 @@ public class TrilobiteEggBlock extends Block {
 
     private boolean shouldHatchProgress(World world) {
         float f = world.getSkyAngle(1.0f);
-        if ((double)f < 0.69 && (double)f > 0.65) {
+        if ((double)f < 0.99 && (double)f > 0.15) {
             return true;
         }
         return world.random.nextInt(500) == 0;
@@ -148,7 +144,7 @@ public class TrilobiteEggBlock extends Block {
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         BlockState blockState = ctx.getWorld().getBlockState(ctx.getBlockPos());
         if (blockState.isOf(this)) {
-            return (BlockState)blockState.with(EGGS, Math.min(4, blockState.get(EGGS) + 1));
+            return blockState.with(EGGS, Math.min(4, blockState.get(EGGS) + 1));
         }
         return super.getPlacementState(ctx);
     }

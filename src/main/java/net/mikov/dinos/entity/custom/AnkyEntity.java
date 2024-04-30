@@ -6,33 +6,50 @@ import net.mikov.dinos.entity.ai.CompyAttackGoal;
 import net.mikov.dinos.item.ModItems;
 import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.InventoryChangedListener;
+import net.minecraft.inventory.StackReference;
+import net.minecraft.item.HorseArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 
-public class AnkyEntity extends TameableEntity implements Tameable {
+public class AnkyEntity extends AbstractDonkeyEntity
+        implements InventoryChangedListener, RideableInventory, Tameable, JumpingMount, Saddleable {
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.MELON, Items.PUMPKIN, Items.SWEET_BERRIES);
@@ -49,9 +66,15 @@ public class AnkyEntity extends TameableEntity implements Tameable {
     public static final AnimationState attackingAnimationState = new AnimationState();
     public int attackingAnimationTimeout = 0;
 
-    public AnkyEntity(EntityType<? extends TameableEntity> entityType, World world) {
+    private static final UUID HORSE_ARMOR_BONUS_ID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
+    private static final TrackedData<Boolean> CHEST = DataTracker.registerData(AnkyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    public static final int field_30412 = 15;
+
+    public AnkyEntity(EntityType<? extends AbstractDonkeyEntity> entityType, World world) {
         super(entityType, world);
-        this.setTamed(false);
+        //this.setTamed(false);
+        this.setStepHeight(1.0f);
+        this.onChestedStatusChanged();
     }
 
     private void setupAnimationStates() {
@@ -110,20 +133,24 @@ public class AnkyEntity extends TameableEntity implements Tameable {
     @Override
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(4, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
-        this.goalSelector.add(5, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
-        this.goalSelector.add(6, new FollowParentGoal(this, 1.1));
-        this.goalSelector.add(7, new AnkyAttackGoal(this, 1.15, true));
-        this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
-        this.goalSelector.add(10, new LookAroundGoal(this));
+        this.goalSelector.add(0, new HorseBondWithPlayerGoal(this, 1.2));
+        this.goalSelector.add(1, new AnimalMateGoal(this, 1.0));
+        this.goalSelector.add(2, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
+        this.goalSelector.add(3, new FollowParentGoal(this, 1.1));
+        this.goalSelector.add(4, new AnkyAttackGoal(this, 1.15, true));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
+        this.goalSelector.add(7, new LookAroundGoal(this));
+        if (this.shouldAmbientStand()) {
+            this.goalSelector.add(8, new AmbientStandGoal(this));
+        }
 
-        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
-        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(AnkyEntity.class));
-        this.targetSelector.add(4, new UntamedActiveTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, FOLLOW_PREDICATE));
+        if (!this.isTame()) {
+            //this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+            //this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+            this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(AnkyEntity.class));
+            this.targetSelector.add(4, new ActiveTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, FOLLOW_PREDICATE));
+        }
     }
 
     @Override
@@ -132,7 +159,7 @@ public class AnkyEntity extends TameableEntity implements Tameable {
     }
 
     public static DefaultAttributeContainer.Builder createAnkyAttributes() {
-        return TameableEntity.createMobAttributes()
+        return AbstractDonkeyEntity.createBaseHorseAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 120)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
@@ -140,9 +167,18 @@ public class AnkyEntity extends TameableEntity implements Tameable {
                 .add(EntityAttributes.GENERIC_ARMOR, 8)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 8)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 10)
-                .add(EntityAttributes.HORSE_JUMP_STRENGTH, 1)
+                .add(EntityAttributes.HORSE_JUMP_STRENGTH, 0.4)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 18);
 
+    }
+
+    @Override
+    protected void initAttributes(Random random) {
+        this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(AnkyEntity.getChildHealthBonus(random::nextInt));
+    }
+
+    protected static float getChildHealthBonus(IntUnaryOperator randomIntGetter) {
+        return 120.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
     }
 
     @Override
@@ -155,6 +191,17 @@ public class AnkyEntity extends TameableEntity implements Tameable {
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return ModEntities.ANKY.create(world);
         //return null;
+    }
+
+    @Override
+    public boolean canBreedWith(AnimalEntity other) {
+        if (other == this) {
+            return this.canBreed();
+        }
+        if (other instanceof AnkyEntity) {
+            return this.canBreed();
+        }
+        return false;
     }
 
     @Override
@@ -267,7 +314,7 @@ public class AnkyEntity extends TameableEntity implements Tameable {
         return super.interactMob(player, hand);
     }*/
 
-    @Override
+    /*@Override
     public void setTamed(boolean tamed) {
         super.setTamed(tamed);
         if (tamed) {
@@ -277,7 +324,7 @@ public class AnkyEntity extends TameableEntity implements Tameable {
             this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(120.0);
         }
         this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(8.0);
-    }
+    }*/
 
     /*@Override
     public boolean canBreedWith(AnimalEntity other) {
@@ -309,25 +356,284 @@ public class AnkyEntity extends TameableEntity implements Tameable {
 
     public void setSit(boolean sitting) {
         this.dataTracker.set(SITTING, sitting);
-        super.setSitting(sitting);
+        //super.setSitting(sitting);
     }
 
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(ATTACKING, false);
+        this.dataTracker.startTracking(CHEST, false);
+    }
+
+    @Override
+    protected void updateSaddle() {
+        if (this.getWorld().isClient) {
+            return;
+        }
+        super.updateSaddle();
+        this.setArmorTypeFromStack(this.items.getStack(1));
+        this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.0f);
+    }
+
+    private void setArmorTypeFromStack(ItemStack stack) {
+        this.equipArmor(stack);
+        if (!this.getWorld().isClient) {
+            int i;
+            this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR).removeModifier(HORSE_ARMOR_BONUS_ID);
+            if (this.isHorseArmor(stack) && (i = ((HorseArmorItem)stack.getItem()).getBonus()) != 0) {
+                this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR).addTemporaryModifier(new EntityAttributeModifier
+                        (HORSE_ARMOR_BONUS_ID, "Horse armor bonus", (double)i, EntityAttributeModifier.Operation.ADDITION));
+            }
+        }
+    }
+
+    @Override
+    public void onInventoryChanged(Inventory sender) {
+        ItemStack itemStack = this.getArmorType();
+        super.onInventoryChanged(sender);
+        ItemStack itemStack2 = this.getArmorType();
+        if (this.age > 20 && this.isHorseArmor(itemStack2) && itemStack != itemStack2) {
+            this.playSound(SoundEvents.ENTITY_HORSE_ARMOR, 0.5f, 1.0f);
+        }
+    }
+
+    @Override
+    protected SoundEvent getAngrySound() {
+        return ModSounds.ANKY_DEATH;
+    }
+
+    @Override
+    public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        boolean bl;
+        boolean bl2 = bl = !this.isBaby() && this.isTame() && player.shouldCancelInteraction();
+        if (this.hasPassengers() || bl) {
+            return super.interactMob(player, hand);
+        }
+        ItemStack itemStack = player.getStackInHand(hand);
+        if (!itemStack.isEmpty()) {
+            if (this.isBreedingItem(itemStack)) {
+                return this.interactHorse(player, itemStack);
+            }
+            if (!this.isTame()) {
+                this.playAngrySound();
+                return ActionResult.success(this.getWorld().isClient);
+            }
+            if (!this.hasChest() && itemStack.isOf(Items.CHEST)) {
+                this.addChest(player, itemStack);
+                return ActionResult.success(this.getWorld().isClient);
+            }
+        }
+        return super.interactMob(player, hand);
+    }
+
+    public boolean hasChest() {
+        return this.dataTracker.get(CHEST);
+    }
+
+    public void setHasChest(boolean hasChest) {
+        this.dataTracker.set(CHEST, hasChest);
+    }
+
+    @Override
+    protected int getInventorySize() {
+        if (this.hasChest()) {
+            return 17;
+        }
+        return super.getInventorySize();
+    }
+
+    private void addChest(PlayerEntity player, ItemStack chest) {
+        this.setHasChest(true);
+        this.playAddChestSound();
+        if (!player.getAbilities().creativeMode) {
+            chest.decrement(1);
+        }
+        this.onChestedStatusChanged();
+    }
+
+    protected void playAddChestSound() {
+        this.playSound(SoundEvents.ENTITY_DONKEY_CHEST, 1.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
+    }
+
+    public int getInventoryColumns() {
+        return 5;
+    }
+
+    @Override
+    protected void dropInventory() {
+        super.dropInventory();
+        if (this.hasChest()) {
+            if (!this.getWorld().isClient) {
+                this.dropItem(Blocks.CHEST);
+            }
+            this.setHasChest(false);
+        }
+    }
+
+    @Override
+    public StackReference getStackReference(int mappedIndex) {
+        if (mappedIndex == 499) {
+            return new StackReference(){
+
+                @Override
+                public ItemStack get() {
+                    return AnkyEntity.this.hasChest() ? new ItemStack(Items.CHEST) : ItemStack.EMPTY;
+                }
+
+                @Override
+                public boolean set(ItemStack stack) {
+                    if (stack.isEmpty()) {
+                        if (AnkyEntity.this.hasChest()) {
+                            AnkyEntity.this.setHasChest(false);
+                            AnkyEntity.this.onChestedStatusChanged();
+                        }
+                        return true;
+                    }
+                    if (stack.isOf(Items.CHEST)) {
+                        if (!AnkyEntity.this.hasChest()) {
+                            AnkyEntity.this.setHasChest(true);
+                            AnkyEntity.this.onChestedStatusChanged();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            };
+        }
+        return super.getStackReference(mappedIndex);
+    }
+
+    @Override
+    protected boolean receiveFood(PlayerEntity player, ItemStack item) {
+        boolean bl = false;
+        float f = 0.0f;
+        int i = 0;
+        int j = 0;
+        if (item.isOf(Items.WHEAT)) {
+            f = 1.0f;
+            i = 30;
+            j = 3;
+        } else if (item.isOf(Items.PUMPKIN)) {
+            f = 3.0f;
+            i = 60;
+            j = 3;
+            if (!this.getWorld().isClient && this.isTame() && this.getBreedingAge() == 0 && !this.isInLove()) {
+                bl = true;
+                this.lovePlayer(player);
+            }
+        } else if (item.isOf(Items.MELON)) {
+            f = 4.0f;
+            i = 60;
+            j = 5;
+            if (!this.getWorld().isClient && this.isTame() && this.getBreedingAge() == 0 && !this.isInLove()) {
+                bl = true;
+                this.lovePlayer(player);
+            }
+        } else if (item.isOf(Items.SWEET_BERRIES)) {
+            f = 10.0f;
+            i = 240;
+            j = 10;
+            if (!this.getWorld().isClient && this.isTame() && this.getBreedingAge() == 0 && !this.isInLove()) {
+                bl = true;
+                this.lovePlayer(player);
+            }
+        }
+        if (this.getHealth() < this.getMaxHealth() && f > 0.0f) {
+            this.heal(f);
+            bl = true;
+        }
+        if (this.isBaby() && i > 0) {
+            this.getWorld().addParticle(ParticleTypes.HAPPY_VILLAGER,
+                    this.getParticleX(1.0), this.getRandomBodyY() + 0.5, this.getParticleZ(1.0), 0.0, 0.0, 0.0);
+            if (!this.getWorld().isClient) {
+                this.growUp(i);
+            }
+            bl = true;
+        }
+        if (j > 0 && (bl || !this.isTame()) && this.getTemper() < this.getMaxTemper()) {
+            bl = true;
+            if (!this.getWorld().isClient) {
+                this.addTemper(j);
+            }
+        }
+        if (bl) {
+            this.emitGameEvent(GameEvent.EAT);
+        }
+        return bl;
     }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putBoolean("isSitting", this.dataTracker.get(SITTING));
+        nbt.putBoolean("ChestedHorse", this.hasChest());
+        if (this.hasChest()) {
+            NbtList nbtList = new NbtList();
+            for (int i = 2; i < this.items.size(); ++i) {
+                ItemStack itemStack = this.items.getStack(i);
+                if (itemStack.isEmpty()) continue;
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound.putByte("Slot", (byte)i);
+                itemStack.writeNbt(nbtCompound);
+                nbtList.add(nbtCompound);
+            }
+            nbt.put("Items", nbtList);
+        }
+        if (!this.items.getStack(1).isEmpty()) {
+            nbt.put("ArmorItem", this.items.getStack(1).writeNbt(new NbtCompound()));
+        }
+    }
+
+    public ItemStack getArmorType() {
+        return this.getEquippedStack(EquipmentSlot.CHEST);
+    }
+
+    private void equipArmor(ItemStack stack) {
+        this.equipStack(EquipmentSlot.CHEST, stack);
+        this.setEquipmentDropChance(EquipmentSlot.CHEST, 0.0f);
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
+        ItemStack itemStack;
         super.readCustomDataFromNbt(nbt);
-        this.dataTracker.set(SITTING, nbt.getBoolean("isSitting"));
+        this.setHasChest(nbt.getBoolean("ChestedHorse"));
+        this.onChestedStatusChanged();
+        if (this.hasChest()) {
+            NbtList nbtList = nbt.getList("Items", NbtElement.COMPOUND_TYPE);
+            for (int i = 0; i < nbtList.size(); ++i) {
+                NbtCompound nbtCompound = nbtList.getCompound(i);
+                int j = nbtCompound.getByte("Slot") & 0xFF;
+                if (j < 2 || j >= this.items.size()) continue;
+                this.items.setStack(j, ItemStack.fromNbt(nbtCompound));
+            }
+        }
+        if (nbt.contains("ArmorItem", NbtElement.COMPOUND_TYPE) &&
+                !(itemStack = ItemStack.fromNbt(nbt.getCompound("ArmorItem"))).isEmpty() && this.isHorseArmor(itemStack)) {
+            this.items.setStack(1, itemStack);
+        }
+        this.updateSaddle();
+    }
+
+    @Override
+    public boolean hasArmorSlot() {
+        return true;
+    }
+
+    @Override
+    public boolean isHorseArmor(ItemStack item) {
+        return item.getItem() instanceof HorseArmorItem;
+    }
+
+    @Override
+    protected void putPlayerOnBack(PlayerEntity player) {
+        this.setEatingGrass(false);
+        this.setAngry(false);
+        if (!this.getWorld().isClient) {
+            player.setYaw(this.getYaw());
+            player.setPitch(this.getPitch());
+            player.startRiding(this);
+        }
     }
 
 }

@@ -39,7 +39,7 @@ public class ModEntities {
     public static final EntityType<AnkyEntity> ANKY = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "anky"),
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, AnkyEntity::new)
-                    .dimensions(EntityDimensions.changing( 2.5f, 1.25f)).build());
+                    .dimensions(EntityDimensions.changing( 2.5f, 1.75f)).build());
 
     public static final EntityType<TrilobiteEntity> TRILOBITE = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "trilobite"),

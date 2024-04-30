@@ -1,7 +1,7 @@
 {
   "item.dinos.dodo_spawn_egg": "Dodo Spawn Egg",
   "item.dinos.trex_spawn_egg": "Tyrannosaurus Spawn Egg",
-  "item.dinos.compy_spawn_egg": "Compsognathusaurus Spawn Egg",
+  "item.dinos.compy_spawn_egg": "Compsognathus Spawn Egg",
   "item.dinos.dimorph_spawn_egg": "Dimorphodon Spawn Egg",
   "item.dinos.coel_spawn_egg": "Coelacanth Spawn Egg",
   "item.dinos.anky_spawn_egg": "Ankylosaurus Spawn Egg",
@@ -13,7 +13,9 @@
   "item.dinos.coel_bucket": "Bucket o' Coelacanth",
   "entity.dinos.trex": "Tyrannosaurus",
   "entity.dinos.dodo": "Dodo",
+  "block.dinos.dodo_egg_block": "Dodo Egg",
   "entity.dinos.compy": "Compy",
+  "block.dinos.compy_egg_block": "Compsognathus Egg",
   "entity.dinos.dimorph": "Dimorphodon",
   "entity.dinos.coel": "Coelacanth",
   "entity.dinos.anky": "Ankylosaurus",

@@ -1,7 +1,12 @@
 package net.mikov.dinos.entity.custom;
 
+import net.mikov.dinos.block.ModBlocks;
+import net.mikov.dinos.block.custom.DodoEggBlock;
+import net.mikov.dinos.block.custom.TrilobiteEggBlock;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.sounds.ModSounds;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
@@ -21,18 +26,27 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.EntityView;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class DodoEntity extends TameableEntity implements Tameable {
-
+    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(DodoEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> DIGGING_DIRT = DataTracker.registerData(DodoEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    int dirtDiggingCounter;
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
 
@@ -44,6 +58,23 @@ public class DodoEntity extends TameableEntity implements Tameable {
     public DodoEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
         this.setTamed(false);
+    }
+
+    public boolean hasEgg() {
+        return this.dataTracker.get(HAS_EGG);
+    }
+
+    void setHasEgg(boolean hasEgg) {
+        this.dataTracker.set(HAS_EGG, hasEgg);
+    }
+
+    public boolean isDiggingDirt() {
+        return this.dataTracker.get(DIGGING_DIRT);
+    }
+
+    void setDiggingDirt(boolean diggingDirt) {
+        this.dirtDiggingCounter = diggingDirt ? 1 : 0;
+        this.dataTracker.set(DIGGING_DIRT, diggingDirt);
     }
 
     private void setupAnimationStates() {
@@ -83,7 +114,8 @@ public class DodoEntity extends TameableEntity implements Tameable {
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new EscapeDangerGoal(this, 1.0));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
+        this.goalSelector.add(3, new MateGoal(this, 1.0));
+        this.goalSelector.add(3, new LayEggGoal(this, 1.0));
         this.goalSelector.add(4, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
         this.goalSelector.add(5, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
         this.goalSelector.add(6, new FollowParentGoal(this, 1.1));
@@ -282,18 +314,115 @@ public class DodoEntity extends TameableEntity implements Tameable {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(SITTING, false);
+        this.dataTracker.startTracking(HAS_EGG, false);
+        this.dataTracker.startTracking(DIGGING_DIRT, false);
     }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putBoolean("isSitting", this.dataTracker.get(SITTING));
+        nbt.putBoolean("HasEgg", this.hasEgg());
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.dataTracker.set(SITTING, nbt.getBoolean("isSitting"));
+        this.setHasEgg(nbt.getBoolean("HasEgg"));
+    }
+
+    // hatching
+
+    static class MateGoal
+            extends AnimalMateGoal {
+        private final DodoEntity dodo;
+
+        MateGoal(DodoEntity dodo, double speed) {
+            super(dodo, speed);
+            this.dodo = dodo;
+        }
+
+        @Override
+        public boolean canStart() {
+            return super.canStart() && !this.dodo.hasEgg();
+        }
+
+        @Override
+        protected void breed() {
+            ServerPlayerEntity serverPlayerEntity = this.animal.getLovingPlayer();
+            if (serverPlayerEntity == null && this.mate.getLovingPlayer() != null) {
+                serverPlayerEntity = this.mate.getLovingPlayer();
+            }
+            if (serverPlayerEntity != null) {
+                serverPlayerEntity.incrementStat(Stats.ANIMALS_BRED);
+                Criteria.BRED_ANIMALS.trigger(serverPlayerEntity, this.animal, this.mate, null);
+            }
+            this.dodo.setHasEgg(true);
+            this.animal.setBreedingAge(6000);
+            this.mate.setBreedingAge(6000);
+            this.animal.resetLoveTicks();
+            this.mate.resetLoveTicks();
+            Random random = this.animal.getRandom();
+            if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+            }
+        }
+    }
+
+    static class LayEggGoal
+            extends MoveToTargetPosGoal {
+        private final DodoEntity dodo;
+
+        LayEggGoal(DodoEntity dodo, double speed) {
+            super(dodo, speed, 16);
+            this.dodo = dodo;
+        }
+
+        @Override
+        public boolean canStart() {
+            if (this.dodo.hasEgg()) {
+                return super.canStart();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return super.shouldContinue() && this.dodo.hasEgg();
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            BlockPos blockPos = this.dodo.getBlockPos();
+            if (!this.dodo.isTouchingWater() && this.hasReached()) {
+                if (this.dodo.dirtDiggingCounter < 1) {
+                    this.dodo.setDiggingDirt(true);
+                } else if (this.dodo.dirtDiggingCounter > this.getTickCount(200)) {
+                    World world = this.dodo.getWorld();
+                    world.playSound(null, blockPos, SoundEvents.ENTITY_TURTLE_LAY_EGG, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
+                    BlockPos blockPos2 = this.targetPos.up();
+                    BlockState blockState = ModBlocks.DODO_EGG_BLOCK.getDefaultState().with(DodoEggBlock.EGGS, this.dodo.random.nextInt(4) + 1);
+                    world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
+                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.dodo, blockState));
+                    this.dodo.setHasEgg(false);
+                    this.dodo.setDiggingDirt(false);
+                    this.dodo.setLoveTicks(600);
+                }
+                if (this.dodo.isDiggingDirt()) {
+                    ++this.dodo.dirtDiggingCounter;
+                }
+            }
+        }
+
+        @Override
+        protected boolean isTargetPos(WorldView world, BlockPos pos) {
+            if (!world.isAir(pos.up())) {
+                return false;
+            }
+            return DodoEggBlock.isDirt(world, pos);
+        }
     }
 
 }

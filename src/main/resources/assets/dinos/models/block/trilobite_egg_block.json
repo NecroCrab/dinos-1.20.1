@@ -1,5 +1,5 @@
 {
-  "parent": "dinos:block/template_trilobite_egg",
+  "parent": "dinos:block/template_egg",
   "textures": {
     "all": "dinos:block/trilobite_egg"
   }

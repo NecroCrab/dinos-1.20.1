@@ -51,6 +51,15 @@
               "function": "minecraft:furnace_smelt"
             },
             {
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 8.0,
+                "min": 4.0
+              },
+              "function": "minecraft:set_count"
+            },
+            {
               "count": {
                 "type": "minecraft:uniform",
                 "max": 8.0,

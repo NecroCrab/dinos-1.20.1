@@ -56,7 +56,6 @@ public class TrilobiteEntity extends TurtleEntity {
     private static final TrackedData<Boolean> LAND_BOUND = DataTracker.registerData(TrilobiteEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> ACTIVELY_TRAVELING = DataTracker.registerData(TrilobiteEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     int sandDiggingCounter;
-    public static final Predicate<LivingEntity> BABY_TURTLE_ON_LAND_FILTER = entity -> entity.isBaby() && !entity.isTouchingWater();
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (ModItems.RAW_COEL);
 
@@ -101,10 +100,6 @@ public class TrilobiteEntity extends TurtleEntity {
         this.dataTracker.set(LAND_BOUND, landBound);
     }
 
-    boolean isActivelyTraveling() {
-        return this.dataTracker.get(ACTIVELY_TRAVELING);
-    }
-
     void setActivelyTraveling(boolean traveling) {
         this.dataTracker.set(ACTIVELY_TRAVELING, traveling);
     }
@@ -119,7 +114,7 @@ public class TrilobiteEntity extends TurtleEntity {
 
     private void setupAnimationStates() {
         if (this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+            this.idleAnimationTimeout = this.random.nextInt(400) + 80;
             this.idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
@@ -244,8 +239,8 @@ public class TrilobiteEntity extends TurtleEntity {
 
     static class TurtleEscapeDangerGoal
             extends EscapeDangerGoal {
-        TurtleEscapeDangerGoal(TurtleEntity turtle, double speed) {
-            super(turtle, speed);
+        TurtleEscapeDangerGoal(TrilobiteEntity trilobite, double speed) {
+            super(trilobite, speed);
         }
 
         @Override
@@ -333,7 +328,7 @@ public class TrilobiteEntity extends TurtleEntity {
                     World world = this.trilobite.getWorld();
                     world.playSound(null, blockPos, SoundEvents.ENTITY_TURTLE_LAY_EGG, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
                     BlockPos blockPos2 = this.targetPos.up();
-                    BlockState blockState = (BlockState) ModBlocks.TRILOBITE_EGG_BLOCK.getDefaultState().with(TrilobiteEggBlock.EGGS, this.trilobite.random.nextInt(4) + 1);
+                    BlockState blockState = ModBlocks.TRILOBITE_EGG_BLOCK.getDefaultState().with(TrilobiteEggBlock.EGGS, this.trilobite.random.nextInt(4) + 1);
                     world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
                     world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.trilobite, blockState));
                     this.trilobite.setHasEgg(false);
@@ -351,7 +346,7 @@ public class TrilobiteEntity extends TurtleEntity {
             if (!world.isAir(pos.up())) {
                 return false;
             }
-            return TurtleEggBlock.isSand(world, pos);
+            return TrilobiteEggBlock.isSand(world, pos);
         }
     }
 

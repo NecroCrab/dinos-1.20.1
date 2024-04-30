@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/template_four_trilobite_eggs",
+  "parent": "dinos:block/template_four_eggs",
   "textures": {
-    "all": "minecraft:block/trilobite_egg"
+    "all": "dinos:block/trilobite_egg"
   }
 }
