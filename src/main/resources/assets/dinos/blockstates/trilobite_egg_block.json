@@ -1,0 +1,208 @@
+{
+  "variants": {
+    "eggs=1,hatch=0": [
+      {
+        "model": "dinos:block/trilobite_egg_block"
+      },
+      {
+        "model": "dinos:block/trilobite_egg_block",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/trilobite_egg_block",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/trilobite_egg_block",
+        "y": 270
+      }
+    ],
+    "eggs=1,hatch=1": [
+      {
+        "model": "dinos:block/slightly_cracked_trilobite_egg"
+      },
+      {
+        "model": "dinos:block/slightly_cracked_trilobite_egg",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/slightly_cracked_trilobite_egg",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/slightly_cracked_trilobite_egg",
+        "y": 270
+      }
+    ],
+    "eggs=1,hatch=2": [
+      {
+        "model": "dinos:block/very_cracked_trilobite_egg"
+      },
+      {
+        "model": "dinos:block/very_cracked_trilobite_egg",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/very_cracked_trilobite_egg",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/very_cracked_trilobite_egg",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=0": [
+      {
+        "model": "dinos:block/two_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/two_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/two_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/two_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=1": [
+      {
+        "model": "dinos:block/two_slightly_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/two_slightly_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/two_slightly_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/two_slightly_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=2": [
+      {
+        "model": "dinos:block/two_very_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/two_very_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/two_very_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/two_very_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=0": [
+      {
+        "model": "dinos:block/three_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/three_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/three_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/three_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=1": [
+      {
+        "model": "dinos:block/three_slightly_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/three_slightly_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/three_slightly_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/three_slightly_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=2": [
+      {
+        "model": "dinos:block/three_very_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/three_very_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/three_very_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/three_very_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=0": [
+      {
+        "model": "dinos:block/four_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/four_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/four_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/four_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=1": [
+      {
+        "model": "dinos:block/four_slightly_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/four_slightly_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/four_slightly_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/four_slightly_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=2": [
+      {
+        "model": "dinos:block/four_very_cracked_trilobite_eggs"
+      },
+      {
+        "model": "dinos:block/four_very_cracked_trilobite_eggs",
+        "y": 90
+      },
+      {
+        "model": "dinos:block/four_very_cracked_trilobite_eggs",
+        "y": 180
+      },
+      {
+        "model": "dinos:block/four_very_cracked_trilobite_eggs",
+        "y": 270
+      }
+    ]
+  }
+}

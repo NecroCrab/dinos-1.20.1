@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_four_trilobite_eggs",
+  "textures": {
+    "all": "minecraft:block/trilobite_egg_slightly_cracked"
+  }
+}

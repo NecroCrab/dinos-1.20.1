@@ -1,9 +1,11 @@
 package net.mikov.dinos.entity.ai;
 
 import net.mikov.dinos.entity.custom.DimorphEntity;
+import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 
 public class DimorphAttackGoal extends MeleeAttackGoal {
@@ -51,6 +53,7 @@ public class DimorphAttackGoal extends MeleeAttackGoal {
 
             if(isTimeToAttack()) {
                 this.mob.getLookControl().lookAt(pEnemy.getX(), pEnemy.getEyeY(), pEnemy.getZ());
+                entity.playSound(SoundEvents.ENTITY_BEE_STING, 1.0f, entity.getSoundPitch());
                 performAttack(pEnemy);
             }
         } else {

@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_trilobite_egg",
+  "textures": {
+    "all": "dinos:block/trilobite_egg_slightly_cracked"
+  }
+}

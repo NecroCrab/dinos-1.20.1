@@ -22,4 +22,7 @@ public class ModModelLayers {
 
     public static final EntityModelLayer ANKY =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "anky"), "main");
+
+    public static final EntityModelLayer TRILOBITE =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "trilobite"), "main");
 }

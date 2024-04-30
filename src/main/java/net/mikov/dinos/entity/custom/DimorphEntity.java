@@ -81,28 +81,21 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     }
 
     private void setupAnimationStates() {
-        if (/*this.isOnGround() &&*/ !this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
+        if (/*this.isOnGround() && !this.moveControl.isMoving() &&*/ this.idleAnimationTimeout <= 0) {
             this.idleAnimationTimeout = this.random.nextInt(1180) + 80;
             this.idleAnimationState.start(this.age);
-        } else {
+        } else /*if (this.isOnGround() && this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0)*/ {
             --this.idleAnimationTimeout;
-            if (/*this.isOnGround() &&*/ this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0) {
-                walkingAnimationTimeout = 40;
-                walkingAnimationState.start(this.age);
-            } else {
-                --this.walkingAnimationTimeout;
-                if (/*!this.isOnGround() &&*/ this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
-                    flyingAnimationTimeout = 80;
-                    flyingAnimationState.start(this.age);
-                } else {
-                    --this.flyingAnimationTimeout;
-                    if (this.moveControl.isMoving()) {
-                        --this.idleAnimationTimeout;
-                    }
-                }
-            }
+            /*walkingAnimationTimeout = 40;
+            walkingAnimationState.start(this.age);*/
+        } /*else if (!this.isOnGround() && this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
+            --this.walkingAnimationTimeout;
+            flyingAnimationTimeout = 80;
+            flyingAnimationState.start(this.age);
+        } else if (this.moveControl.isMoving()) {
+            --this.idleAnimationTimeout;
         }
-        /*if (!this.isOnGround()) {
+        if (!this.isOnGround()) {
             idleAnimationState.stop();
         }*/
         /*if (!this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
@@ -119,12 +112,12 @@ public class DimorphEntity extends TameableEntity implements Tameable {
             walkingAnimationState.stop();
             idleAnimationState.stop();
         }*/
-        /*if (this.isInAir() && this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
+        if (!this.isOnGround() /*&& this.moveControl.isMoving()*/ && this.flyingAnimationTimeout <= 0) {
             flyingAnimationTimeout = 80;
             flyingAnimationState.start(this.age);
         } else {
             --this.flyingAnimationTimeout;
-        }*/
+        }
         /*if(!this.isInAir()) {
             flyingAnimationState.stop();
         }*/

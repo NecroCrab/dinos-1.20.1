@@ -65,7 +65,7 @@ public class AnkyAttackGoal extends MeleeAttackGoal {
     }
 
     private boolean isEnemyWithinAttackDistance(LivingEntity pEnemy) {
-        return this.entity.distanceTo(pEnemy) <= 5f; // TODO
+        return this.entity.distanceTo(pEnemy) <= 4f; // TODO
     }
 
     protected void resetAttackCooldown() {

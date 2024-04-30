@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.CoelEntity;
+import net.mikov.dinos.entity.custom.TrilobiteEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.entity.mob.WaterCreatureEntity;
@@ -136,6 +137,26 @@ public class ModEntitySpawn {
                 SpawnGroup.CREATURE,
                 ModEntities.ANKY, 60, 1, 4);
         SpawnRestriction.register(ModEntities.ANKY, SpawnRestriction.Location.ON_GROUND,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                AnimalEntity::isValidNaturalSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.BEACH,
+                        BiomeKeys.SNOWY_BEACH,
+                        BiomeKeys.STONY_SHORE,
+                        BiomeKeys.RIVER,
+                        BiomeKeys.COLD_OCEAN,
+                        BiomeKeys.DEEP_COLD_OCEAN,
+                        BiomeKeys.DEEP_FROZEN_OCEAN,
+                        BiomeKeys.FROZEN_OCEAN,
+                        BiomeKeys.DEEP_OCEAN,
+                        BiomeKeys.DEEP_LUKEWARM_OCEAN,
+                        BiomeKeys.LUKEWARM_OCEAN,
+                        BiomeKeys.OCEAN,
+                        BiomeKeys.FROZEN_RIVER),
+                SpawnGroup.WATER_CREATURE,
+                ModEntities.TRILOBITE, 290, 2, 4);
+        SpawnRestriction.register(ModEntities.TRILOBITE, SpawnRestriction.Location.IN_WATER,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 AnimalEntity::isValidNaturalSpawn);
     }

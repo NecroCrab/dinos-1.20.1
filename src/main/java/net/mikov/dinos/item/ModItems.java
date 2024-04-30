@@ -12,6 +12,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import net.mikov.dinos.block.ModBlocks;
 
 
 public class ModItems {
@@ -28,6 +29,8 @@ public class ModItems {
             new SpawnEggItem(ModEntities.COEL, 0xA1A1A1, 0xF9F9F9, new FabricItemSettings()));
     public static final Item ANKY_SPAWN_EGG = registerItem( "anky_spawn_egg",
             new SpawnEggItem(ModEntities.ANKY, 0x957256, 0xA1A1A1, new FabricItemSettings()));
+    public static final Item TRILOBITE_SPAWN_EGG = registerItem( "trilobite_spawn_egg",
+            new SpawnEggItem(ModEntities.TRILOBITE, 0xFFFFFF, 0xA1A1A1, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -52,6 +55,11 @@ public class ModItems {
         entries.add(DIMORPH_SPAWN_EGG);
         entries.add(COEL_SPAWN_EGG);
         entries.add(ANKY_SPAWN_EGG);
+        entries.add(TRILOBITE_SPAWN_EGG);
+    }
+
+    public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
+        entries.add(ModBlocks.TRILOBITE_EGG_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {
@@ -63,5 +71,6 @@ public class ModItems {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(ModItems::addItemsToFoodItemGroup);
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(ModItems::addItemsToSpawnEggItemGroup);
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(ModItems::addItemsToNaturalItemGroup);
     }
 }

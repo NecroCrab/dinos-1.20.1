@@ -5,6 +5,7 @@ import net.mikov.dinos.entity.custom.TrexEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 
 public class CompyAttackGoal extends MeleeAttackGoal {
@@ -52,6 +53,7 @@ public class CompyAttackGoal extends MeleeAttackGoal {
 
             if(isTimeToAttack()) {
                 this.mob.getLookControl().lookAt(pEnemy.getX(), pEnemy.getEyeY(), pEnemy.getZ());
+                entity.playSound(SoundEvents.ENTITY_BEE_STING, 1.0f, entity.getSoundPitch());
                 performAttack(pEnemy);
             }
         } else {

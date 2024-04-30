@@ -41,4 +41,9 @@ public class ModEntities {
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, AnkyEntity::new)
                     .dimensions(EntityDimensions.changing( 2.5f, 1.25f)).build());
 
+    public static final EntityType<TrilobiteEntity> TRILOBITE = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "trilobite"),
+            FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE, TrilobiteEntity::new)
+                    .dimensions(EntityDimensions.changing( 1f, 1f)).build());
+
 }
