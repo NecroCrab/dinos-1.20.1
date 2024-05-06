@@ -25,4 +25,7 @@ public class ModModelLayers {
 
     public static final EntityModelLayer TRILOBITE =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "trilobite"), "main");
+
+    public static final EntityModelLayer CERATO =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "cerato"), "main");
 }

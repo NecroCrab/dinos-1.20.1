@@ -30,7 +30,9 @@ public class ModItems {
     public static final Item ANKY_SPAWN_EGG = registerItem( "anky_spawn_egg",
             new SpawnEggItem(ModEntities.ANKY, 0x957256, 0xA1A1A1, new FabricItemSettings()));
     public static final Item TRILOBITE_SPAWN_EGG = registerItem( "trilobite_spawn_egg",
-            new SpawnEggItem(ModEntities.TRILOBITE, 0xFFFFFF, 0xA1A1A1, new FabricItemSettings()));
+            new SpawnEggItem(ModEntities.TRILOBITE, 0xFFFFFF, 0x957256, new FabricItemSettings()));
+    public static final Item CERATO_SPAWN_EGG = registerItem( "cerato_spawn_egg",
+            new SpawnEggItem(ModEntities.CERATO, 0xA80E0E, 0xFCC369, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -56,12 +58,18 @@ public class ModItems {
         entries.add(COEL_SPAWN_EGG);
         entries.add(ANKY_SPAWN_EGG);
         entries.add(TRILOBITE_SPAWN_EGG);
+        entries.add(CERATO_SPAWN_EGG);
     }
 
     public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
         entries.add(ModBlocks.TRILOBITE_EGG_BLOCK);
         entries.add(ModBlocks.DODO_EGG_BLOCK);
         entries.add(ModBlocks.COMPY_EGG_BLOCK);
+        entries.add(ModBlocks.DIMORPH_EGG_BLOCK);
+        entries.add(ModBlocks.ANKY_EGG_BLOCK);
+        entries.add(ModBlocks.TREX_EGG_BLOCK);
+        entries.add(ModBlocks.COEL_EGG_BLOCK);
+        entries.add(ModBlocks.CERATO_EGG_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {

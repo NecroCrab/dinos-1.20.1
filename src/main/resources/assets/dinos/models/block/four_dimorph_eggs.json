@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_four_small_eggs",
+  "textures": {
+    "all": "dinos:block/dimorph_egg"
+  }
+}

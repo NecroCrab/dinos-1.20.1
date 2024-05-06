@@ -21,11 +21,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "dinos:compy_egg"
+          "name": "dinos:cerato_egg_block"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "dinos:blocks/compy_egg"
+  "random_sequence": "dinos:blocks/cerato_egg_block"
 }

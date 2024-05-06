@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_two_small_eggs",
+  "textures": {
+    "all": "dinos:block/dimorph_egg_very_cracked"
+  }
+}

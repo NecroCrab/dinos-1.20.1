@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_two_eggs",
+  "textures": {
+    "all": "dinos:block/cerato_egg"
+  }
+}

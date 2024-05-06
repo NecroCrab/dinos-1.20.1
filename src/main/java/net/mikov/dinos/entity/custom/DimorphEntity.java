@@ -1,10 +1,15 @@
 package net.mikov.dinos.entity.custom;
 
+import net.mikov.dinos.block.ModBlocks;
+import net.mikov.dinos.block.custom.CompyEggBlock;
+import net.mikov.dinos.block.custom.DimorphEggBlock;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.ai.DimorphAttackGoal;
 import net.mikov.dinos.entity.animation.ModAnimations;
 import net.mikov.dinos.entity.client.DimorphModel;
 import net.mikov.dinos.item.ModItems;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
@@ -31,19 +36,28 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.EntityView;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.function.Predicate;
 
 public class DimorphEntity extends TameableEntity implements Tameable {
+    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(DimorphEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> DIGGING_DIRT = DataTracker.registerData(DimorphEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    int dirtDiggingCounter;
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT);
@@ -58,8 +72,8 @@ public class DimorphEntity extends TameableEntity implements Tameable {
 
     public static final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
-    //public static final AnimationState sittingAnimationState = new AnimationState();
-    //public int sittingAnimationTimeout = 0;
+    public static final AnimationState sittingAnimationState = new AnimationState();
+    public int sittingAnimationTimeout = 0;
     public static final AnimationState attackingAnimationState = new AnimationState();
     public int attackingAnimationTimeout = 0;
     public static final AnimationState flyingAnimationState = new AnimationState();
@@ -71,8 +85,8 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     public float maxWingDeviation;
     public float prevMaxWingDeviation;
     public float prevFlapProgress;
-    private float flapSpeed = 0.0f;
-    private float field_28640 = 0.0f;
+    private float flapSpeed = 1.0f;
+    private float field_28640 = 1.0f;
 
     public DimorphEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
@@ -80,47 +94,42 @@ public class DimorphEntity extends TameableEntity implements Tameable {
         this.moveControl = new FlightMoveControl(this, 5, false);
     }
 
+    public boolean hasEgg() {
+        return this.dataTracker.get(HAS_EGG);
+    }
+
+    void setHasEgg(boolean hasEgg) {
+        this.dataTracker.set(HAS_EGG, hasEgg);
+    }
+
+    public boolean isDiggingDirt() {
+        return this.dataTracker.get(DIGGING_DIRT);
+    }
+
+    void setDiggingDirt(boolean diggingDirt) {
+        this.dirtDiggingCounter = diggingDirt ? 1 : 0;
+        this.dataTracker.set(DIGGING_DIRT, diggingDirt);
+    }
+
     private void setupAnimationStates() {
-        if (/*this.isOnGround() && !this.moveControl.isMoving() &&*/ this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = this.random.nextInt(1180) + 80;
-            this.idleAnimationState.start(this.age);
-        } else /*if (this.isOnGround() && this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0)*/ {
-            --this.idleAnimationTimeout;
-            /*walkingAnimationTimeout = 40;
-            walkingAnimationState.start(this.age);*/
-        } /*else if (!this.isOnGround() && this.moveControl.isMoving() && this.flyingAnimationTimeout <= 0) {
-            --this.walkingAnimationTimeout;
-            flyingAnimationTimeout = 80;
-            flyingAnimationState.start(this.age);
-        } else if (this.moveControl.isMoving()) {
+        if (this.isOnGround() && this.idleAnimationTimeout <= 0) {
+            idleAnimationTimeout = this.random.nextInt(1180) + 80;
+            idleAnimationState.start(this.age);
+        } else {
             --this.idleAnimationTimeout;
         }
-        if (!this.isOnGround()) {
-            idleAnimationState.stop();
-        }*/
-        /*if (!this.moveControl.isMoving() && this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = 80;
-            this.idleAnimationState.start(this.age);
-        }*/
-        /*if (this.isOnGround() && this.moveControl.isMoving() && this.walkingAnimationTimeout <= 0) {
-            walkingAnimationTimeout = 40;
-            walkingAnimationState.start(this.age);
-        } else {
-            --this.walkingAnimationTimeout;
-        }*/
-        /*if (!this.isOnGround()) {
-            walkingAnimationState.stop();
-            idleAnimationState.stop();
-        }*/
-        if (!this.isOnGround() /*&& this.moveControl.isMoving()*/ && this.flyingAnimationTimeout <= 0) {
-            flyingAnimationTimeout = 80;
+        if (this.isInAir() && this.flyingAnimationTimeout <= 0) {
+            flyingAnimationTimeout = this.random.nextInt(1180) + 80;
             flyingAnimationState.start(this.age);
         } else {
             --this.flyingAnimationTimeout;
         }
-        /*if(!this.isInAir()) {
-            flyingAnimationState.stop();
-        }*/
+        if (this.isOnGround() && this.getVelocity().length() >= 0.02 && this.walkingAnimationTimeout <= 0) {
+            walkingAnimationTimeout = this.random.nextInt(1180) + 40;
+            walkingAnimationState.start(this.age);
+        } else {
+            --this.walkingAnimationTimeout;
+        }
         /*if (this.isSitting() && sittingAnimationTimeout <= 0) {
             sittingAnimationTimeout = 400;
             sittingAnimationState.start(this.age);
@@ -131,6 +140,7 @@ public class DimorphEntity extends TameableEntity implements Tameable {
             sittingAnimationState.stop();
         }*/
         if (this.isAttacking() && attackingAnimationTimeout <= 0) {
+            idleAnimationState.stop();
             attackingAnimationTimeout = 40;
             attackingAnimationState.start(this.age);
         } else {
@@ -156,10 +166,10 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     @Override
     protected void updateLimbs(float posDelta) {
         float f = this.getPose() == EntityPose.STANDING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
-        this.limbAnimator.updateLimbs(f, 0.2f);
+        this.limbAnimator.updateLimbs(f, 0.8f);
 
         float u = this.getPose() == EntityPose.FALL_FLYING ? Math.min(posDelta * 6.0f, 8.0f) : 0.0f;
-        this.limbAnimator.updateLimbs(u, 0.2f);
+        this.limbAnimator.updateLimbs(u, 0.8f);
 
         float s = this.getPose() == EntityPose.SITTING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
         this.limbAnimator.updateLimbs(s, 0.2f);
@@ -176,14 +186,15 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     @Override
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(4, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
-        this.goalSelector.add(5, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
-        this.goalSelector.add(6, new FollowParentGoal(this, 1.1));
-        this.goalSelector.add(7, new DimorphAttackGoal(this, 1.15, true));
-        this.goalSelector.add(8, new FlyOntoTreeGoal(this, 1.0));
-        this.goalSelector.add(9, new FlyRandomlyGoal(this));
+        this.goalSelector.add(1, new SitGoal(this));
+        this.goalSelector.add(3, new MateGoal(this, 1.0));
+        this.goalSelector.add(3, new LayEggGoal(this, 1.0));
+        this.goalSelector.add(3, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
+        this.goalSelector.add(4, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
+        this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
+        this.goalSelector.add(6, new DimorphAttackGoal(this, 1.15, true));
+        this.goalSelector.add(7, new FlyOntoTreeGoal(this, 1.0));
+        this.goalSelector.add(8, new FlyRandomlyGoal(this));
         this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
         this.goalSelector.add(10, new LookAroundGoal(this));
@@ -228,17 +239,17 @@ public class DimorphEntity extends TameableEntity implements Tameable {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_HUSK_AMBIENT;
+        return SoundEvents.ENTITY_FOX_SCREECH;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_HUSK_HURT;
+        return SoundEvents.ENTITY_FOX_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_HUSK_DEATH;
+        return SoundEvents.ENTITY_FOX_DEATH;
     }
 
     @Override
@@ -385,25 +396,29 @@ public class DimorphEntity extends TameableEntity implements Tameable {
         super.initDataTracker();
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(ATTACKING, false);
+        this.dataTracker.startTracking(HAS_EGG, false);
+        this.dataTracker.startTracking(DIGGING_DIRT, false);
     }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putBoolean("isSitting", this.dataTracker.get(SITTING));
+        nbt.putBoolean("HasEgg", this.hasEgg());
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.dataTracker.set(SITTING, nbt.getBoolean("isSitting"));
+        this.setHasEgg(nbt.getBoolean("HasEgg"));
     }
 
     //flying
 
-    /*public boolean isInAir() {
+    public boolean isInAir() {
         return !this.isOnGround();
-    }*/
+    }
 
     @Override
     protected EntityNavigation createNavigation(World world) {
@@ -520,6 +535,99 @@ public class DimorphEntity extends TameableEntity implements Tameable {
                 return Vec3d.ofBottomCenter(blockPos2);
             }
             return null;
+        }
+    }
+
+    // hatching
+
+    static class MateGoal
+            extends AnimalMateGoal {
+        private final DimorphEntity dimorph;
+
+        MateGoal(DimorphEntity dimorph, double speed) {
+            super(dimorph, speed);
+            this.dimorph = dimorph;
+        }
+
+        @Override
+        public boolean canStart() {
+            return super.canStart() && !this.dimorph.hasEgg();
+        }
+
+        @Override
+        protected void breed() {
+            ServerPlayerEntity serverPlayerEntity = this.animal.getLovingPlayer();
+            if (serverPlayerEntity == null && this.mate.getLovingPlayer() != null) {
+                serverPlayerEntity = this.mate.getLovingPlayer();
+            }
+            if (serverPlayerEntity != null) {
+                serverPlayerEntity.incrementStat(Stats.ANIMALS_BRED);
+                Criteria.BRED_ANIMALS.trigger(serverPlayerEntity, this.animal, this.mate, null);
+            }
+            this.dimorph.setHasEgg(true);
+            this.animal.setBreedingAge(6000);
+            this.mate.setBreedingAge(6000);
+            this.animal.resetLoveTicks();
+            this.mate.resetLoveTicks();
+            Random random = this.animal.getRandom();
+            if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+            }
+        }
+    }
+
+    static class LayEggGoal
+            extends MoveToTargetPosGoal {
+        private final DimorphEntity dimorph;
+
+        LayEggGoal(DimorphEntity dimorph, double speed) {
+            super(dimorph, speed, 16);
+            this.dimorph = dimorph;
+        }
+
+        @Override
+        public boolean canStart() {
+            if (this.dimorph.hasEgg()) {
+                return super.canStart();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return super.shouldContinue() && this.dimorph.hasEgg();
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            BlockPos blockPos = this.dimorph.getBlockPos();
+            if (!this.dimorph.isTouchingWater() && this.hasReached()) {
+                if (this.dimorph.dirtDiggingCounter < 1) {
+                    this.dimorph.setDiggingDirt(true);
+                } else if (this.dimorph.dirtDiggingCounter > this.getTickCount(200)) {
+                    World world = this.dimorph.getWorld();
+                    world.playSound(null, blockPos, SoundEvents.ENTITY_TURTLE_LAY_EGG, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
+                    BlockPos blockPos2 = this.targetPos.up();
+                    BlockState blockState = ModBlocks.DIMORPH_EGG_BLOCK.getDefaultState().with(DimorphEggBlock.EGGS, this.dimorph.random.nextInt(4) + 1);
+                    world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
+                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.dimorph, blockState));
+                    this.dimorph.setHasEgg(false);
+                    this.dimorph.setDiggingDirt(false);
+                    this.dimorph.setLoveTicks(600);
+                }
+                if (this.dimorph.isDiggingDirt()) {
+                    ++this.dimorph.dirtDiggingCounter;
+                }
+            }
+        }
+
+        @Override
+        protected boolean isTargetPos(WorldView world, BlockPos pos) {
+            if (!world.isAir(pos.up())) {
+                return false;
+            }
+            return DimorphEggBlock.isDirt(world, pos);
         }
     }
 

@@ -3,7 +3,6 @@ package net.mikov.dinos.block.custom;
 import net.mikov.dinos.block.ModBlocks;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.CompyEntity;
-import net.mikov.dinos.entity.custom.DodoEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -63,7 +62,7 @@ public class CompyEggBlock extends Block {
         if (!this.breaksEgg(world, entity)) {
             return;
         }
-        if (!world.isClient && world.random.nextInt(inverseChance) == 0 && state.isOf(ModBlocks.DODO_EGG_BLOCK)) {
+        if (!world.isClient && world.random.nextInt(inverseChance) == 0 && state.isOf(ModBlocks.COMPY_EGG_BLOCK)) {
             this.breakEgg(world, pos, state);
         }
     }

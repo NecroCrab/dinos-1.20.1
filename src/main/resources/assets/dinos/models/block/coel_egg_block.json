@@ -1,0 +1,7 @@
+{
+    "parent": "dinos:block/template_fish_egg",
+    "textures": {
+        "0": "dinos:block/coel_eggs_block",
+        "particle": "minecraft:block/frogspawn"
+    }
+}

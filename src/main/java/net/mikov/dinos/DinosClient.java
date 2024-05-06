@@ -31,5 +31,8 @@ public class DinosClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.TRILOBITE, TrilobiteRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.TRILOBITE, TrilobiteModel::getTexturedModelData);
 
+        EntityRendererRegistry.register(ModEntities.CERATO, CeratoRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.CERATO, CeratoModel::getTexturedModelData);
+
     }
 }

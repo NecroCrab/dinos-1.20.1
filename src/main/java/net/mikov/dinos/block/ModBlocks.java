@@ -3,9 +3,7 @@ package net.mikov.dinos.block;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.mikov.dinos.Dinos;
-import net.mikov.dinos.block.custom.CompyEggBlock;
-import net.mikov.dinos.block.custom.DodoEggBlock;
-import net.mikov.dinos.block.custom.TrilobiteEggBlock;
+import net.mikov.dinos.block.custom.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -22,6 +20,16 @@ public class ModBlocks {
             new DodoEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
     public static final Block COMPY_EGG_BLOCK = registerBlock( "compy_egg_block",
             new CompyEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block DIMORPH_EGG_BLOCK = registerBlock( "dimorph_egg_block",
+            new DimorphEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block ANKY_EGG_BLOCK = registerBlock( "anky_egg_block",
+            new AnkyEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block TREX_EGG_BLOCK = registerBlock( "trex_egg_block",
+            new TrexEggBlock(FabricBlockSettings.copyOf(Blocks.SNIFFER_EGG)));
+    public static final Block COEL_EGG_BLOCK = registerBlock( "coel_egg_block",
+            new CoelEggBlock(FabricBlockSettings.copyOf(Blocks.FROGSPAWN)));
+    public static final Block CERATO_EGG_BLOCK = registerBlock( "cerato_egg_block",
+            new CeratoEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);

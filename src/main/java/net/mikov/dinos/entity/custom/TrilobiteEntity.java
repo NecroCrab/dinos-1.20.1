@@ -112,6 +112,11 @@ public class TrilobiteEntity extends TurtleEntity {
         this.setStepHeight(1.0f);
     }
 
+    @Override
+    public boolean canSpawn(WorldView world) {
+        return world.doesNotIntersectEntities(this);
+    }
+
     private void setupAnimationStates() {
         if (this.idleAnimationTimeout <= 0) {
             this.idleAnimationTimeout = this.random.nextInt(400) + 80;

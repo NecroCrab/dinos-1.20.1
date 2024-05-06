@@ -43,7 +43,12 @@ public class ModEntities {
 
     public static final EntityType<TrilobiteEntity> TRILOBITE = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "trilobite"),
-            FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE, TrilobiteEntity::new)
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TrilobiteEntity::new)
                     .dimensions(EntityDimensions.changing( 1f, 1f)).build());
+
+    public static final EntityType<CeratoEntity> CERATO = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "cerato"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, CeratoEntity::new)
+                    .dimensions(EntityDimensions.changing( 2.2f, 2.5f)).build());
 
 }

@@ -1,8 +1,13 @@
 package net.mikov.dinos.entity.custom;
 
+import net.mikov.dinos.block.ModBlocks;
+import net.mikov.dinos.block.custom.AnkyEggBlock;
+import net.mikov.dinos.block.custom.TrexEggBlock;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.ai.TrexAttackGoal;
 import net.mikov.dinos.item.ModItems;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityPose;
@@ -10,6 +15,8 @@ import net.minecraft.entity.EntityType;
 import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.NoPenaltyTargeting;
+import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -19,9 +26,7 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandler;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.Angerable;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.mob.*;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -36,28 +41,46 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.screen.HorseScreenHandler;
+import net.minecraft.server.ServerConfigHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.EntityView;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 
 public class TrexEntity extends AbstractDonkeyEntity
         implements InventoryChangedListener, RideableInventory, Tameable, JumpingMount, Saddleable {
+    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(TrexEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> DIGGING_DIRT = DataTracker.registerData(TrexEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    int dirtDiggingCounter;
+    private static final TrackedData<Byte> HORSE_FLAGS = DataTracker.registerData(TrexEntity.class, TrackedDataHandlerRegistry.BYTE);
+    private static final int TAMED_FLAG = 2;
+    @Nullable
+    private UUID ownerUuid;
+    protected static final TrackedData<Optional<UUID>> OWNER_UUID = DataTracker.registerData(TrexEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
 
     public static final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
@@ -101,9 +124,25 @@ public class TrexEntity extends AbstractDonkeyEntity
 
     public TrexEntity(EntityType<? extends AbstractDonkeyEntity> entityType, World world) {
         super(entityType, world);
-        this.setStepHeight(3.0f);
+        this.setStepHeight(2.0f);
         this.onChestedStatusChanged();
+    }
 
+    public boolean hasEgg() {
+        return this.dataTracker.get(HAS_EGG);
+    }
+
+    void setHasEgg(boolean hasEgg) {
+        this.dataTracker.set(HAS_EGG, hasEgg);
+    }
+
+    public boolean isDiggingDirt() {
+        return this.dataTracker.get(DIGGING_DIRT);
+    }
+
+    void setDiggingDirt(boolean diggingDirt) {
+        this.dirtDiggingCounter = diggingDirt ? 1 : 0;
+        this.dataTracker.set(DIGGING_DIRT, diggingDirt);
     }
 
     private void setupAnimationStates() {
@@ -148,6 +187,41 @@ public class TrexEntity extends AbstractDonkeyEntity
         super.initDataTracker();
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(CHEST, false);
+        this.dataTracker.startTracking(HAS_EGG, false);
+        this.dataTracker.startTracking(DIGGING_DIRT, false);
+        this.dataTracker.startTracking(HORSE_FLAGS, (byte)0);
+        this.dataTracker.startTracking(OWNER_UUID, Optional.empty());
+    }
+
+    protected boolean getHorseFlag(int bitmask) {
+        return (this.dataTracker.get(HORSE_FLAGS) & bitmask) != 0;
+    }
+
+    protected void setHorseFlag(int bitmask, boolean flag) {
+        byte b = this.dataTracker.get(HORSE_FLAGS);
+        if (flag) {
+            this.dataTracker.set(HORSE_FLAGS, (byte)(b | bitmask));
+        } else {
+            this.dataTracker.set(HORSE_FLAGS, (byte)(b & ~bitmask));
+        }
+    }
+
+    public boolean isTame() {
+        return this.getHorseFlag(TAMED_FLAG);
+    }
+
+    @Override
+    @Nullable
+    public UUID getOwnerUuid() {
+        return this.ownerUuid;
+    }
+
+    public void setOwnerUuid(@Nullable UUID ownerUuid) {
+        this.ownerUuid = ownerUuid;
+    }
+
+    public void setTame(boolean tame) {
+        this.setHorseFlag(TAMED_FLAG, tame);
     }
 
     @Override
@@ -168,7 +242,8 @@ public class TrexEntity extends AbstractDonkeyEntity
     protected void initGoals() {
         this.goalSelector.add( 0, new SwimGoal(this));
         this.goalSelector.add( 0, new HorseBondWithPlayerGoal(this, 1.2));
-        this.goalSelector.add( 1, new AnimalMateGoal( this, 1.1, TrexEntity.class));
+        this.goalSelector.add( 1, new MateGoal(this, 1.0));
+        this.goalSelector.add( 1, new LayEggGoal(this, 1.0));
         this.goalSelector.add( 2, new TemptGoal( this, 1.1D, Ingredient.ofItems(ModItems.RAW_PRIMAL_MEAT), false));
         this.goalSelector.add( 3, new FollowParentGoal(this, 1.15D));
         this.goalSelector.add( 4, new TrexAttackGoal(this, 1.15, true));
@@ -178,6 +253,9 @@ public class TrexEntity extends AbstractDonkeyEntity
         if (this.shouldAmbientStand()) {
             this.goalSelector.add(9, new AmbientStandGoal(this));
         }
+
+        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
 
         if (!this.isTame()) {
             this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(TrexEntity.class));
@@ -428,7 +506,7 @@ public class TrexEntity extends AbstractDonkeyEntity
             f = 4.0f;
             i = 60;
             j = 5;
-            if (!this.getWorld().isClient && this.isTame() && this.getBreedingAge() == 0 && !this.isInLove()) {
+            if (!this.getWorld().isClient && this.getBreedingAge() == 0 && !this.isInLove()) {
                 bl = true;
                 this.lovePlayer(player);
             }
@@ -436,7 +514,7 @@ public class TrexEntity extends AbstractDonkeyEntity
             f = 10.0f;
             i = 240;
             j = 10;
-            if (!this.getWorld().isClient && this.isTame() && this.getBreedingAge() == 0 && !this.isInLove()) {
+            if (!this.getWorld().isClient && this.getBreedingAge() == 0 && !this.isInLove()) {
                 bl = true;
                 this.lovePlayer(player);
             }
@@ -468,6 +546,7 @@ public class TrexEntity extends AbstractDonkeyEntity
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
+        nbt.putBoolean("HasEgg", this.hasEgg());
         nbt.putBoolean("ChestedHorse", this.hasChest());
         if (this.hasChest()) {
             NbtList nbtList = new NbtList();
@@ -484,6 +563,9 @@ public class TrexEntity extends AbstractDonkeyEntity
         if (!this.items.getStack(1).isEmpty()) {
             nbt.put("ArmorItem", this.items.getStack(1).writeNbt(new NbtCompound()));
         }
+        if (this.getOwnerUuid() != null) {
+            nbt.putUuid("Owner", this.getOwnerUuid());
+        }
     }
 
     public ItemStack getArmorType() {
@@ -498,7 +580,9 @@ public class TrexEntity extends AbstractDonkeyEntity
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         ItemStack itemStack;
+        UUID uUID;
         super.readCustomDataFromNbt(nbt);
+        this.setHasEgg(nbt.getBoolean("HasEgg"));
         this.setHasChest(nbt.getBoolean("ChestedHorse"));
         this.onChestedStatusChanged();
         if (this.hasChest()) {
@@ -515,6 +599,20 @@ public class TrexEntity extends AbstractDonkeyEntity
             this.items.setStack(1, itemStack);
         }
         this.updateSaddle();
+        if (nbt.containsUuid("Owner")) {
+            uUID = nbt.getUuid("Owner");
+        } else {
+            String string = nbt.getString("Owner");
+            uUID = ServerConfigHandler.getPlayerUuidByName(this.getServer(), string);
+        }
+        if (uUID != null) {
+            try {
+                this.setOwnerUuid(uUID);
+                this.setTame(true);
+            } catch (Throwable throwable) {
+                this.setTame(false);
+            }
+        }
     }
 
     @Override
@@ -525,5 +623,234 @@ public class TrexEntity extends AbstractDonkeyEntity
     @Override
     public boolean isHorseArmor(ItemStack item) {
         return item.getItem() instanceof HorseArmorItem;
+    }
+
+    // hatching
+
+    static class MateGoal
+            extends AnimalMateGoal {
+        private final TrexEntity trex;
+
+        MateGoal(TrexEntity trex, double speed) {
+            super(trex, speed);
+            this.trex = trex;
+        }
+
+        @Override
+        public boolean canStart() {
+            return super.canStart() && !this.trex.hasEgg();
+        }
+
+        @Override
+        protected void breed() {
+            ServerPlayerEntity serverPlayerEntity = this.animal.getLovingPlayer();
+            if (serverPlayerEntity == null && this.mate.getLovingPlayer() != null) {
+                serverPlayerEntity = this.mate.getLovingPlayer();
+            }
+            if (serverPlayerEntity != null) {
+                serverPlayerEntity.incrementStat(Stats.ANIMALS_BRED);
+                Criteria.BRED_ANIMALS.trigger(serverPlayerEntity, this.animal, this.mate, null);
+            }
+            this.trex.setHasEgg(true);
+            this.animal.setBreedingAge(6000);
+            this.mate.setBreedingAge(6000);
+            this.animal.resetLoveTicks();
+            this.mate.resetLoveTicks();
+            Random random = this.animal.getRandom();
+            if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+            }
+        }
+    }
+
+    static class LayEggGoal
+            extends MoveToTargetPosGoal {
+        private final TrexEntity trex;
+
+        LayEggGoal(TrexEntity trex, double speed) {
+            super(trex, speed, 16);
+            this.trex = trex;
+        }
+
+        @Override
+        public boolean canStart() {
+            if (this.trex.hasEgg()) {
+                return super.canStart();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return super.shouldContinue() && this.trex.hasEgg();
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            BlockPos blockPos = this.trex.getBlockPos();
+            if (!this.trex.isTouchingWater() && this.hasReached()) {
+                if (this.trex.dirtDiggingCounter < 1) {
+                    this.trex.setDiggingDirt(true);
+                } else if (this.trex.dirtDiggingCounter > this.getTickCount(200)) {
+                    World world = this.trex.getWorld();
+                    world.playSound(null, blockPos, SoundEvents.BLOCK_SNIFFER_EGG_PLOP, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
+                    BlockPos blockPos2 = this.targetPos.up();
+                    BlockState blockState = ModBlocks.TREX_EGG_BLOCK.getDefaultState();
+                    world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
+                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.trex, blockState));
+                    this.trex.setHasEgg(false);
+                    this.trex.setDiggingDirt(false);
+                    this.trex.setLoveTicks(600);
+                }
+                if (this.trex.isDiggingDirt()) {
+                    ++this.trex.dirtDiggingCounter;
+                }
+            }
+        }
+
+        @Override
+        protected boolean isTargetPos(WorldView world, BlockPos pos) {
+            if (!world.isAir(pos.up())) {
+                return false;
+            }
+            return TrexEggBlock.isDirt(world, pos);
+        }
+    }
+
+    // attack goals
+
+    public void setOwner(PlayerEntity player) {
+        this.setTame(true);
+        this.setOwnerUuid(player.getUuid());
+        if (player instanceof ServerPlayerEntity) {
+            Criteria.TAME_ANIMAL.trigger((ServerPlayerEntity)player, this);
+        }
+    }
+
+    @Override
+    public boolean canTarget(LivingEntity target) {
+        if (this.isOwner(target)) {
+            return false;
+        }
+        return super.canTarget(target);
+    }
+
+    public boolean isOwner(LivingEntity entity) {
+        return entity == this.getOwner();
+    }
+
+    @Override
+    public AbstractTeam getScoreboardTeam() {
+        LivingEntity livingEntity;
+        if (this.isTame() && (livingEntity = this.getOwner()) != null) {
+            return livingEntity.getScoreboardTeam();
+        }
+        return super.getScoreboardTeam();
+    }
+
+    @Override
+    public boolean isTeammate(Entity other) {
+        if (this.isTame()) {
+            LivingEntity livingEntity = this.getOwner();
+            if (other == livingEntity) {
+                return true;
+            }
+            if (livingEntity != null) {
+                return livingEntity.isTeammate(other);
+            }
+        }
+        return super.isTeammate(other);
+    }
+
+    public boolean canAttackWithOwner(LivingEntity target, LivingEntity owner) {
+        if (target instanceof GhastEntity) {
+            return false;
+        }
+        if (target instanceof TrexEntity) {
+            TrexEntity trexEntity = (TrexEntity)target;
+            return !trexEntity.isTame() || trexEntity.getOwner() != owner;
+        }
+        if (target instanceof PlayerEntity && owner instanceof PlayerEntity && !((PlayerEntity)owner).shouldDamagePlayer((PlayerEntity)target)) {
+            return false;
+        }
+        if (target instanceof AbstractHorseEntity && ((AbstractHorseEntity)target).isTame()) {
+            return false;
+        }
+        return !(target instanceof TameableEntity) || !((TameableEntity)target).isTamed();
+    }
+
+    public static class TrackOwnerAttackerGoal
+            extends TrackTargetGoal {
+        private final TrexEntity trex;
+        private LivingEntity attacker;
+        private int lastAttackedTime;
+
+        public TrackOwnerAttackerGoal(TrexEntity trex) {
+            super(trex, false);
+            this.trex = trex;
+            this.setControls(EnumSet.of(Goal.Control.TARGET));
+        }
+
+        @Override
+        public boolean canStart() {
+            if (!this.trex.isTame()) {
+                return false;
+            }
+            LivingEntity livingEntity = this.trex.getOwner();
+            if (livingEntity == null) {
+                return false;
+            }
+            this.attacker = livingEntity.getAttacker();
+            int i = livingEntity.getLastAttackedTime();
+            return i != this.lastAttackedTime && this.canTrack(this.attacker, TargetPredicate.DEFAULT) && this.trex.canAttackWithOwner(this.attacker, livingEntity);
+        }
+
+        @Override
+        public void start() {
+            this.mob.setTarget(this.attacker);
+            LivingEntity livingEntity = this.trex.getOwner();
+            if (livingEntity != null) {
+                this.lastAttackedTime = livingEntity.getLastAttackedTime();
+            }
+            super.start();
+        }
+    }
+
+    public static class AttackWithOwnerGoal
+            extends TrackTargetGoal {
+        private final TrexEntity trex;
+        private LivingEntity attacking;
+        private int lastAttackTime;
+
+        public AttackWithOwnerGoal(TrexEntity trex) {
+            super(trex, false);
+            this.trex = trex;
+            this.setControls(EnumSet.of(Goal.Control.TARGET));
+        }
+
+        @Override
+        public boolean canStart() {
+            if (!this.trex.isTame()) {
+                return false;
+            }
+            LivingEntity livingEntity = this.trex.getOwner();
+            if (livingEntity == null) {
+                return false;
+            }
+            this.attacking = livingEntity.getAttacking();
+            int i = livingEntity.getLastAttackTime();
+            return i != this.lastAttackTime && this.canTrack(this.attacking, TargetPredicate.DEFAULT) && this.trex.canAttackWithOwner(this.attacking, livingEntity);
+        }
+
+        @Override
+        public void start() {
+            this.mob.setTarget(this.attacking);
+            LivingEntity livingEntity = this.trex.getOwner();
+            if (livingEntity != null) {
+                this.lastAttackTime = livingEntity.getLastAttackTime();
+            }
+            super.start();
+        }
     }
 }

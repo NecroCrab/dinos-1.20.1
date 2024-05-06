@@ -1,5 +1,5 @@
 {
-  "parent": "dinos:block/template_egg",
+  "parent": "dinos:block/template_small_egg",
   "textures": {
     "all": "dinos:block/dodo_egg_very_cracked"
   }

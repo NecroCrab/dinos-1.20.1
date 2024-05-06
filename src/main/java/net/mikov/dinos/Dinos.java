@@ -52,6 +52,7 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.COEL, CoelEntity.createCoelAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.ANKY, AnkyEntity.createAnkyAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.TRILOBITE, TrilobiteEntity.createTriloAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.CERATO, CeratoEntity.createCeratoAttributes());
 
 		ModWorldGen.generateWorldGen();
 		FishingLoot.registerFishingLoot();

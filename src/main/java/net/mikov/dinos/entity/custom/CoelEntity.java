@@ -1,8 +1,13 @@
 package net.mikov.dinos.entity.custom;
 
+import net.mikov.dinos.block.ModBlocks;
+import net.mikov.dinos.block.custom.AbstractFishEggBlock;
+import net.mikov.dinos.block.custom.AnkyEggBlock;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.item.ModItems;
 import net.mikov.dinos.sounds.ModSounds;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
@@ -17,11 +22,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.WaterCreatureEntity;
-import net.minecraft.entity.passive.FishEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.SchoolingFishEntity;
-import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -29,31 +30,34 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.EntityView;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
-public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
+public class CoelEntity extends AnimalEntity implements Bucketable {
     private static final TrackedData<Boolean> FROM_BUCKET = DataTracker.registerData(CoelEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(CoelEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
 
     public static final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
-    public static final AnimationState sittingAnimationState = new AnimationState();
-    public int sittingAnimationTimeout = 0;
 
     @Override
     public boolean cannotDespawn() {
@@ -68,11 +72,6 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
     @Override
     public EntityGroup getGroup() {
         return EntityGroup.AQUATIC;
-    }
-
-    @Override
-    public boolean canSpawn(WorldView world) {
-        return world.doesNotIntersectEntities(this);
     }
 
     protected void tickWaterBreathingAir(int air) {
@@ -104,15 +103,14 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
         return false;
     }
 
-    public static boolean canSpawn(EntityType<? extends TameableEntity> type, WorldAccess world, SpawnReason reason, BlockPos pos, Random random) {
+    public static boolean canSpawn(EntityType<? extends AnimalEntity> type, WorldAccess world, SpawnReason reason, BlockPos pos, Random random) {
         int i = world.getSeaLevel();
         int j = i - 13;
         return pos.getY() >= j && pos.getY() <= i && world.getFluidState(pos.down()).isIn(FluidTags.WATER) && world.getBlockState(pos.up()).isOf(Blocks.WATER);
     }
 
-    public CoelEntity(EntityType<? extends TameableEntity> entityType, World world) {
+    public CoelEntity(EntityType<? extends AnimalEntity> entityType, World world) {
         super(entityType, world);
-        this.setTamed(false);
         this.moveControl = new CoelEntity.FishMoveControl(this);
         this.setPathfindingPenalty(PathNodeType.WATER, 0.0f);
     }
@@ -123,15 +121,6 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
             this.idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
-        }
-        if (this.isSitting() && sittingAnimationTimeout <= 0) {
-            sittingAnimationTimeout = 40;
-            sittingAnimationState.start(this.age);
-        } else {
-            --this.sittingAnimationTimeout;
-        }
-        if(!this.isSitting()) {
-            sittingAnimationState.stop();
         }
     }
 
@@ -153,8 +142,8 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
     protected void initGoals() {
         this.goalSelector.add(0, new EscapeDangerGoal(this, 1.25));
         this.goalSelector.add(4, new FleeEntityGoal<PlayerEntity>(this, PlayerEntity.class, 8.0f, 1.6, 1.4, EntityPredicates.EXCEPT_SPECTATOR::test));
-        this.goalSelector.add(1, new AnimalMateGoal(this, 1.0));
-        //this.goalSelector.add(3, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
+        this.goalSelector.add(1, new MateGoal(this, 1.0));
+        this.goalSelector.add(1, new LayEggGoal(this, 1.0));
         this.goalSelector.add(2, new TemptGoal(this, 2.0, BREEDING_INGREDIENT, false));
         this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(6, new SwimToRandomPlaceGoal(this));
@@ -197,7 +186,7 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
     }
 
     public static DefaultAttributeContainer.Builder createCoelAttributes() {
-        return TameableEntity.createMobAttributes()
+        return AnimalEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 8)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.45)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
@@ -251,146 +240,10 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
         return SoundEvents.ENTITY_FISH_SWIM;
     }
 
-    //taming
-
-    @Override
-    public EntityView method_48926() {
-        return this.getWorld();
-    }
-
-    /*@Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getStackInHand(hand);
-        Item item = itemStack.getItem();
-
-        Item itemForTaming = Items.WHEAT;
-
-        if (this.getWorld().isClient) {
-            boolean bl = this.isOwner(player) || this.isTamed() || itemStack.isOf(Items.WHEAT) && !this.isTamed();
-            return bl ? ActionResult.CONSUME : ActionResult.PASS;
-        }
-        if (this.isTamed()) {
-            ActionResult actionResult;
-            if (this.isBreedingItem(itemStack) && this.getHealth() < this.getMaxHealth()) {
-                if (!player.getAbilities().creativeMode) {
-                    itemStack.decrement(1);
-                }
-                this.heal(item.getFoodComponent().getHunger());
-                return ActionResult.SUCCESS;
-            }
-            if ((actionResult = super.interactMob(player, hand)).isAccepted() && !this.isBaby() || !this.isOwner(player))
-                return actionResult;
-            this.setSit(!this.isSitting());
-            this.jumping = false;
-            this.navigation.stop();
-            this.setTarget(null);
-            return ActionResult.SUCCESS;
-        }
-        if (itemStack.isOf(Items.WHEAT) || !this.isTamed());
-            if (!player.getAbilities().creativeMode) {
-                itemStack.decrement(1);
-            }
-            if (this.random.nextInt(3) == 0) {
-                this.setOwner(player);
-                this.navigation.stop();
-                this.setTarget(null);
-                this.setSit(true);
-                this.getWorld().sendEntityStatus(this, EntityStatuses.ADD_POSITIVE_PLAYER_REACTION_PARTICLES);
-                return ActionResult.SUCCESS;
-            } else {
-                this.getWorld().sendEntityStatus(this, EntityStatuses.ADD_NEGATIVE_PLAYER_REACTION_PARTICLES);
-            }
-            return ActionResult.SUCCESS;
-    }*/
-
-    /*@Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        ItemStack itemstack = player.getStackInHand(hand);
-        Item item = itemstack.getItem();
-
-        Item itemForTaming = Items.WHEAT;
-
-        if (item == itemForTaming && !isTamed()) {
-            if (this.getWorld().isClient()) {
-                return ActionResult.CONSUME;
-            } else {
-                if (!player.getAbilities().creativeMode) {
-                    itemstack.decrement(1);
-                }
-
-                if (!this.getWorld().isClient()) {
-                    super.setOwner(player);
-                    this.navigation.stop();
-                    this.setTarget(null);
-                    this.getWorld().sendEntityStatus(this, (byte)7);
-                    setSit(true);
-                }
-
-                return ActionResult.SUCCESS;
-            }
-        }
-
-        if(isTamed() && !this.getWorld().isClient() && hand == Hand.MAIN_HAND) {
-            setSit(!isSitting());
-            return ActionResult.SUCCESS;
-        }
-
-        if (itemstack.getItem() == itemForTaming) {
-            return ActionResult.PASS;
-        }
-
-        return super.interactMob(player, hand);
-    }*/
-
-    @Override
-    public void setTamed(boolean tamed) {
-        super.setTamed(tamed);
-        if (tamed) {
-            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(20.0);
-            this.setHealth(20.0f);
-        } else {
-            this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(10.0);
-        }
-        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(1.0);
-    }
-
-    /*@Override
-    public boolean canBreedWith(AnimalEntity other) {
-        if (other == this) {
-            return false;
-        }
-        if (!this.isTamed()) {
-            return false;
-        }
-        if (!(other instanceof DodoEntity)) {
-            return false;
-        }
-        DodoEntity dodoEntity = (DodoEntity)other;
-        if (!dodoEntity.isTamed()) {
-            return false;
-        }
-        if (dodoEntity.isInSittingPose()) {
-            return false;
-        }
-        return this.isInLove() && dodoEntity.isInLove();
-    }*/
-
-    private static final TrackedData<Boolean> SITTING =
-            DataTracker.registerData(CoelEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-
-    public boolean isSitting() {
-        return this.dataTracker.get(SITTING);
-    }
-
-    public void setSit(boolean sitting) {
-        this.dataTracker.set(SITTING, sitting);
-        super.setSitting(sitting);
-    }
-
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(FROM_BUCKET, false);
+        this.dataTracker.startTracking(HAS_EGG, false);
     }
 
     @Override
@@ -406,15 +259,15 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putBoolean("isSitting", this.dataTracker.get(SITTING));
         nbt.putBoolean("FromBucket", this.isFromBucket());
+        nbt.putBoolean("HasEgg", this.hasEgg());
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        this.dataTracker.set(SITTING, nbt.getBoolean("isSitting"));
         this.setFromBucket(nbt.getBoolean("FromBucket"));
+        this.setHasEgg(nbt.getBoolean("HasEgg"));
     }
 
     @Override
@@ -440,8 +293,6 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
     protected boolean hasSelfControl() {
         return true;
     }
-
-    //protected abstract SoundEvent getFlopSound();
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
@@ -494,6 +345,99 @@ public class CoelEntity extends TameableEntity implements Tameable, Bucketable {
         @Override
         public boolean canStart() {
             return this.fish.hasSelfControl() && super.canStart();
+        }
+    }
+
+    //hatching
+
+    public boolean hasEgg() {
+        return this.dataTracker.get(HAS_EGG);
+    }
+
+    void setHasEgg(boolean hasEgg) {
+        this.dataTracker.set(HAS_EGG, hasEgg);
+    }
+
+    static class MateGoal
+            extends AnimalMateGoal {
+        private final CoelEntity coel;
+
+        MateGoal(CoelEntity coel, double speed) {
+            super(coel, speed);
+            this.coel = coel;
+        }
+
+        @Override
+        public boolean canStart() {
+            return super.canStart() && !this.coel.hasEgg();
+        }
+
+        @Override
+        protected void breed() {
+            ServerPlayerEntity serverPlayerEntity = this.animal.getLovingPlayer();
+            if (serverPlayerEntity == null && this.mate.getLovingPlayer() != null) {
+                serverPlayerEntity = this.mate.getLovingPlayer();
+            }
+            if (serverPlayerEntity != null) {
+                serverPlayerEntity.incrementStat(Stats.ANIMALS_BRED);
+                Criteria.BRED_ANIMALS.trigger(serverPlayerEntity, this.animal, this.mate, null);
+            }
+            this.coel.setHasEgg(true);
+            this.animal.setBreedingAge(6000);
+            this.mate.setBreedingAge(6000);
+            this.animal.resetLoveTicks();
+            this.mate.resetLoveTicks();
+            Random random = this.animal.getRandom();
+            if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+            }
+        }
+    }
+
+    static class LayEggGoal
+            extends MoveToTargetPosGoal {
+        private final CoelEntity coel;
+
+        LayEggGoal(CoelEntity coel, double speed) {
+            super(coel, speed, 16);
+            this.coel = coel;
+        }
+
+        @Override
+        public boolean canStart() {
+            if (this.coel.hasEgg()) {
+                return super.canStart();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return super.shouldContinue() && this.coel.hasEgg();
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            BlockPos blockPos = this.coel.getBlockPos();
+            if (this.coel.isTouchingWater() && this.hasReached()) {
+                    World world = this.coel.getWorld();
+                    world.playSound(null, blockPos, SoundEvents.ENTITY_FROG_LAY_SPAWN, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
+                    BlockPos blockPos2 = this.targetPos.up();
+                    BlockState blockState = ModBlocks.COEL_EGG_BLOCK.getDefaultState();
+                    world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
+                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.coel, blockState));
+                    this.coel.setHasEgg(false);
+                    this.coel.setLoveTicks(600);
+            }
+        }
+
+        @Override
+        protected boolean isTargetPos(WorldView world, BlockPos pos) {
+            if (!world.isWater(pos.up())) {
+                return false;
+            }
+            return AbstractFishEggBlock.canLayAt(world, pos);
         }
     }
 
