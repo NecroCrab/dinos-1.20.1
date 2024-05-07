@@ -21,11 +21,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "dinos:trilobite_egg"
+          "name": "dinos:dodo_egg_block"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "dinos:blocks/trilobite_egg"
+  "random_sequence": "dinos:blocks/dodo_egg_block"
 }

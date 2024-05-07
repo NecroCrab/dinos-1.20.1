@@ -258,13 +258,13 @@ public class CeratoEntity extends AbstractDonkeyEntity
     public static DefaultAttributeContainer.Builder createCeratoAttributes() {
         return AbstractDonkeyEntity.createBaseHorseAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 70)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2f)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 6)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 2)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 2)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 2)
-                .add(EntityAttributes.HORSE_JUMP_STRENGTH, 2.5)
+                .add(EntityAttributes.HORSE_JUMP_STRENGTH, 1.0)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40);
 
     }
@@ -303,13 +303,13 @@ public class CeratoEntity extends AbstractDonkeyEntity
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_ENDER_DRAGON_AMBIENT;
+        return ModSounds.CERATO_AMBIENT;
     }
 
     @Nullable
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_ENDER_DRAGON_HURT;
+        return ModSounds.CERATO_HURT;
     }
 
     @Nullable
@@ -369,7 +369,7 @@ public class CeratoEntity extends AbstractDonkeyEntity
 
     @Override
     protected SoundEvent getAngrySound() {
-        return SoundEvents.ENTITY_ENDER_DRAGON_GROWL;
+        return ModSounds.CERATO_HURT;
     }
 
     @Override

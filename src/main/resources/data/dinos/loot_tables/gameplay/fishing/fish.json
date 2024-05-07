@@ -8,6 +8,11 @@
           "type": "minecraft:item",
           "name": "dinos:raw_coel",
           "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "dinos:raw_piranha",
+          "weight": 10
         }
       ]
     }

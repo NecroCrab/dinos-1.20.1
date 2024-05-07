@@ -34,5 +34,8 @@ public class DinosClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.CERATO, CeratoRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.CERATO, CeratoModel::getTexturedModelData);
 
+        EntityRendererRegistry.register(ModEntities.PIRANHA, PiranhaRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.PIRANHA, PiranhaModel::getTexturedModelData);
+
     }
 }

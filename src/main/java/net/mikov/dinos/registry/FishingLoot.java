@@ -21,7 +21,8 @@ public class FishingLoot {
             if (source.isBuiltin() && FISH_LOOT.equals(id)) {
                 LootPool.Builder poolBuilder = LootPool.builder();
                 poolBuilder.with(ItemEntry.builder(ModItems.RAW_COEL).weight(25));
-                poolBuilder.with(ItemEntry.builder(Items.COD).weight(60));
+                poolBuilder.with(ItemEntry.builder(ModItems.RAW_PIRANHA).weight(10));
+                poolBuilder.with(ItemEntry.builder(Items.COD).weight(50));
                 poolBuilder.with(ItemEntry.builder(Items.SALMON).weight(25));
                 poolBuilder.with(ItemEntry.builder(Items.PUFFERFISH).weight(13));
                 poolBuilder.with(ItemEntry.builder(Items.TROPICAL_FISH).weight(2));

@@ -30,6 +30,8 @@ public class ModBlocks {
             new CoelEggBlock(FabricBlockSettings.copyOf(Blocks.FROGSPAWN)));
     public static final Block CERATO_EGG_BLOCK = registerBlock( "cerato_egg_block",
             new CeratoEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block PIRANHA_EGG_BLOCK = registerBlock( "piranha_egg_block",
+            new PiranhaEggBlock(FabricBlockSettings.copyOf(Blocks.FROGSPAWN)));
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);

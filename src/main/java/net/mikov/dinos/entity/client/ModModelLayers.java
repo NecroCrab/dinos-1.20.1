@@ -28,4 +28,7 @@ public class ModModelLayers {
 
     public static final EntityModelLayer CERATO =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "cerato"), "main");
+
+    public static final EntityModelLayer PIRANHA =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "piranha"), "main");
 }

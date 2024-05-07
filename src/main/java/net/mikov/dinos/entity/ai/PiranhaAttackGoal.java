@@ -1,23 +1,24 @@
 package net.mikov.dinos.entity.ai;
 
 import net.mikov.dinos.entity.custom.CeratoEntity;
-import net.mikov.dinos.entity.custom.TrexEntity;
+import net.mikov.dinos.entity.custom.PiranhaEntity;
 import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 
-public class CeratoAttackGoal extends MeleeAttackGoal {
+public class PiranhaAttackGoal extends MeleeAttackGoal {
 
-    private final CeratoEntity entity;
+    private final PiranhaEntity entity;
     private int attackDelay = 20;
     private int ticksUntilNextAttack = 20;
     private boolean shouldCountTillNextAttack = false;
 
-    public CeratoAttackGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
+    public PiranhaAttackGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
         super(mob, speed, pauseWhenMobIdle);
-        entity = ((CeratoEntity) mob);
+        entity = ((PiranhaEntity) mob);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class CeratoAttackGoal extends MeleeAttackGoal {
             if(isTimeToAttack()) {
                 this.mob.getLookControl().lookAt(pEnemy.getX(), pEnemy.getEyeY(), pEnemy.getZ());
                 performAttack(pEnemy);
-                entity.playSound(ModSounds.CERATO_ATTACK, 1.0f, entity.getSoundPitch());
+                entity.playSound(SoundEvents.ENTITY_PHANTOM_BITE, 1.0f, entity.getSoundPitch());
             }
         } else {
             resetAttackCooldown();
@@ -65,7 +66,7 @@ public class CeratoAttackGoal extends MeleeAttackGoal {
     }
 
     private boolean isEnemyWithinAttackDistance(LivingEntity pEnemy) {
-        return this.entity.distanceTo(pEnemy) <= 3f; // TODO
+        return this.entity.distanceTo(pEnemy) <= 2f; // TODO
     }
 
     protected void resetAttackCooldown() {

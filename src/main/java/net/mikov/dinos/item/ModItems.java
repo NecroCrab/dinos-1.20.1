@@ -33,6 +33,8 @@ public class ModItems {
             new SpawnEggItem(ModEntities.TRILOBITE, 0xFFFFFF, 0x957256, new FabricItemSettings()));
     public static final Item CERATO_SPAWN_EGG = registerItem( "cerato_spawn_egg",
             new SpawnEggItem(ModEntities.CERATO, 0xA80E0E, 0xFCC369, new FabricItemSettings()));
+    public static final Item PIRANHA_SPAWN_EGG = registerItem( "piranha_spawn_egg",
+            new SpawnEggItem(ModEntities.PIRANHA, 0x5F6464, 0x85F1BC, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -41,6 +43,10 @@ public class ModItems {
     public static final Item COOKED_COEL = registerItem("cooked_coel", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_COEL)));
     public static final Item COEL_BUCKET = registerItem("coel_bucket",
             new EntityBucketItem(ModEntities.COEL, Fluids.WATER, SoundEvents.ITEM_BUCKET_EMPTY_FISH, new FabricItemSettings().maxCount(1)));
+    public static final Item RAW_PIRANHA = registerItem("raw_piranha", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PIRANHA)));
+    public static final Item COOKED_PIRANHA = registerItem("cooked_piranha", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PIRANHA)));
+    public static final Item PIRANHA_BUCKET = registerItem("piranha_bucket",
+            new EntityBucketItem(ModEntities.PIRANHA, Fluids.WATER, SoundEvents.ITEM_BUCKET_EMPTY_FISH, new FabricItemSettings().maxCount(1)));
 
     public static void addItemsToFoodItemGroup(FabricItemGroupEntries entries) {
         entries.add(RAW_PRIMAL_MEAT);
@@ -48,6 +54,9 @@ public class ModItems {
         entries.add(RAW_COEL);
         entries.add(COOKED_COEL);
         entries.add(COEL_BUCKET);
+        entries.add(RAW_PIRANHA);
+        entries.add(COOKED_PIRANHA);
+        entries.add(PIRANHA_BUCKET);
     }
 
     public static void addItemsToSpawnEggItemGroup(FabricItemGroupEntries entries) {
@@ -59,6 +68,7 @@ public class ModItems {
         entries.add(ANKY_SPAWN_EGG);
         entries.add(TRILOBITE_SPAWN_EGG);
         entries.add(CERATO_SPAWN_EGG);
+        entries.add(PIRANHA_SPAWN_EGG);
     }
 
     public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
@@ -70,6 +80,7 @@ public class ModItems {
         entries.add(ModBlocks.TREX_EGG_BLOCK);
         entries.add(ModBlocks.COEL_EGG_BLOCK);
         entries.add(ModBlocks.CERATO_EGG_BLOCK);
+        entries.add(ModBlocks.PIRANHA_EGG_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {

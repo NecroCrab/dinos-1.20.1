@@ -1,0 +1,9 @@
+{
+    "type": "minecraft:smelting",
+    "ingredient": {
+        "item": "dinos:raw_piranha"
+    },
+    "result": "dinos:cooked_piranha",
+    "experience": 1.9,
+    "cookingtime": 600
+}

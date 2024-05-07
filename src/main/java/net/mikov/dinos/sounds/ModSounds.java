@@ -13,6 +13,9 @@ public class ModSounds {
     public static SoundEvent DODO_AMBIENT = registerSound("dodo_ambient");
     public static SoundEvent ANKY_AMBIENT = registerSound("anky_ambient");
     public static SoundEvent ANKY_DEATH = registerSound("anky_death");
+    public static SoundEvent CERATO_ATTACK = registerSound("cerato_attack");
+    public static SoundEvent CERATO_HURT = registerSound("cerato_hurt");
+    public static SoundEvent CERATO_AMBIENT = registerSound("cerato_ambient");
 
     static SoundEvent registerSound(String id) {
         SoundEvent sound = SoundEvent.of(new Identifier(Dinos.MOD_ID, id));

@@ -2,10 +2,10 @@ package net.mikov.dinos.entity.custom;
 
 import net.mikov.dinos.block.ModBlocks;
 import net.mikov.dinos.block.custom.AbstractFishEggBlock;
-import net.mikov.dinos.block.custom.AnkyEggBlock;
 import net.mikov.dinos.entity.ModEntities;
+import net.mikov.dinos.entity.ai.PiranhaAttackGoal;
+import net.mikov.dinos.entity.ai.TrexAttackGoal;
 import net.mikov.dinos.item.ModItems;
-import net.mikov.dinos.sounds.ModSounds;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,7 +22,11 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -49,15 +53,58 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
-public class CoelEntity extends AnimalEntity implements Bucketable {
-    private static final TrackedData<Boolean> FROM_BUCKET = DataTracker.registerData(CoelEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(CoelEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+import java.util.function.Predicate;
 
-    private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
-            (Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+public class PiranhaEntity extends AnimalEntity implements Bucketable {
+    private static final TrackedData<Boolean> FROM_BUCKET = DataTracker.registerData(PiranhaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(PiranhaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+    private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems(ModItems.RAW_PRIMAL_MEAT);
+
+    public static final Predicate<LivingEntity> FOLLOW_PREDICATE = entity -> {
+        EntityType<?> entityType = entity.getType();
+        return entityType == EntityType.SHEEP ||
+                entityType == EntityType.COW ||
+                entityType == EntityType.HORSE ||
+                entityType == EntityType.CAMEL ||
+                entityType == EntityType.CREEPER ||
+                entityType == EntityType.DONKEY ||
+                entityType == EntityType.EVOKER ||
+                entityType == EntityType.GOAT ||
+                entityType == EntityType.HOGLIN ||
+                entityType == EntityType.LLAMA ||
+                entityType == EntityType.MULE ||
+                entityType == EntityType.PANDA ||
+                entityType == EntityType.PILLAGER ||
+                entityType == EntityType.POLAR_BEAR ||
+                entityType == EntityType.COD ||
+                entityType == EntityType.SALMON ||
+                entityType == EntityType.SPIDER ||
+                entityType == EntityType.SQUID ||
+                entityType == EntityType.VILLAGER ||
+                entityType == EntityType.RAVAGER ||
+                entityType == EntityType.SNIFFER ||
+                entityType == EntityType.TRADER_LLAMA ||
+                entityType == EntityType.VEX ||
+                entityType == EntityType.VINDICATOR ||
+                entityType == EntityType.WANDERING_TRADER ||
+                entityType == EntityType.WITCH ||
+                entityType == ModEntities.DODO ||
+                entityType == ModEntities.ANKY ||
+                entityType == ModEntities.TREX ||
+                entityType == ModEntities.TRILOBITE ||
+                entityType == ModEntities.COMPY ||
+                entityType == ModEntities.COEL ||
+                entityType == ModEntities.CERATO ||
+                entityType == EntityType.BOAT ||
+                entityType == EntityType.CHEST_BOAT ||
+                entityType == EntityType.PIG;
+    };
 
     public static final AnimationState idleAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
+    public int idleAnimationTimeout = 0;
+    public static final AnimationState attackingAnimationState = new AnimationState();
+    public int attackingAnimationTimeout = 0;
 
     @Override
     public boolean cannotDespawn() {
@@ -114,9 +161,9 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
         return world.doesNotIntersectEntities(this);
     }
 
-    public CoelEntity(EntityType<? extends AnimalEntity> entityType, World world) {
+    public PiranhaEntity(EntityType<? extends AnimalEntity> entityType, World world) {
         super(entityType, world);
-        this.moveControl = new CoelEntity.FishMoveControl(this);
+        this.moveControl = new PiranhaEntity.FishMoveControl(this);
         this.setPathfindingPenalty(PathNodeType.WATER, 0.0f);
     }
 
@@ -127,6 +174,27 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
         } else {
             --this.idleAnimationTimeout;
         }
+        if (this.isAttacking() && this.attackingAnimationTimeout <= 0) {
+            this.attackingAnimationTimeout = 40;
+            this.attackingAnimationState.start(this.age);
+        } else {
+            --this.attackingAnimationTimeout;
+        }
+        if (!this.isAttacking()) {
+            attackingAnimationState.stop();
+        }
+    }
+
+    private static final TrackedData<Boolean> ATTACKING =
+            DataTracker.registerData(PiranhaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+    public boolean isAttacking() {
+        return this.dataTracker.get(ATTACKING);
+    }
+
+    public void setAttacking(boolean attacking) {
+        this.dataTracker.set(ATTACKING, attacking);
+        super.setAttacking(attacking);
     }
 
     @Override
@@ -145,14 +213,17 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     @Override
     protected void initGoals() {
-        this.goalSelector.add(0, new EscapeDangerGoal(this, 1.25));
-        this.goalSelector.add(4, new FleeEntityGoal<PlayerEntity>(this, PlayerEntity.class, 8.0f, 1.6, 1.4, EntityPredicates.EXCEPT_SPECTATOR::test));
-        this.goalSelector.add(1, new MateGoal(this, 1.0));
-        this.goalSelector.add(1, new LayEggGoal(this, 1.0));
+        this.goalSelector.add(0, new MateGoal(this, 1.5));
+        this.goalSelector.add(1, new LayEggGoal(this, 1.5));
         this.goalSelector.add(2, new TemptGoal(this, 2.0, BREEDING_INGREDIENT, false));
-        this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
-        this.goalSelector.add(6, new SwimToRandomPlaceGoal(this));
-        this.goalSelector.add(7, new LookAroundGoal(this));
+        this.goalSelector.add(3, new FollowParentGoal(this, 1.1));
+        this.goalSelector.add(4, new PiranhaAttackGoal(this, 2.15, true));
+        this.goalSelector.add(5, new SwimToRandomPlaceGoal(this));
+        this.goalSelector.add(6, new LookAroundGoal(this));
+
+        this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(PiranhaEntity.class));
+        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>((MobEntity) this, PlayerEntity.class, true));
+        this.targetSelector.add(3, new ActiveTargetGoal<>(this, LivingEntity.class, true, FOLLOW_PREDICATE));
     }
 
     @Override
@@ -190,17 +261,17 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
         return this.isBaby() ? dimensions.height * 0.85f : dimensions.height * 0.92f;
     }
 
-    public static DefaultAttributeContainer.Builder createCoelAttributes() {
+    public static DefaultAttributeContainer.Builder createPiranhaAttributes() {
         return AnimalEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 8)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.45)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 12)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.5)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 0)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 0)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0)
                 .add(EntityAttributes.HORSE_JUMP_STRENGTH, 1)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 12);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 16);
 
     }
 
@@ -212,13 +283,13 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
     @Nullable
     @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return ModEntities.COEL.create(world);
+        return ModEntities.PIRANHA.create(world);
         //return null;
     }
 
     @Override
     public ItemStack getBucketItem() {
-        return new ItemStack(ModItems.COEL_BUCKET);
+        return new ItemStack(ModItems.PIRANHA_BUCKET);
     }
 
     @Override
@@ -247,6 +318,7 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     protected void initDataTracker() {
         super.initDataTracker();
+        this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(FROM_BUCKET, false);
         this.dataTracker.startTracking(HAS_EGG, false);
     }
@@ -305,9 +377,9 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     static class FishMoveControl
             extends MoveControl {
-        private final CoelEntity fish;
+        private final PiranhaEntity fish;
 
-        FishMoveControl(CoelEntity owner) {
+        FishMoveControl(PiranhaEntity owner) {
             super(owner);
             this.fish = owner;
         }
@@ -317,7 +389,7 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
             if (this.fish.isSubmergedIn(FluidTags.WATER)) {
                 this.fish.setVelocity(this.fish.getVelocity().add(0.0, 0.005, 0.0));
             }
-            if (this.state != MoveControl.State.MOVE_TO || this.fish.getNavigation().isIdle()) {
+            if (this.state != State.MOVE_TO || this.fish.getNavigation().isIdle()) {
                 this.fish.setMovementSpeed(0.0f);
                 return;
             }
@@ -340,9 +412,9 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     static class SwimToRandomPlaceGoal
             extends SwimAroundGoal {
-        private final CoelEntity fish;
+        private final PiranhaEntity fish;
 
-        public SwimToRandomPlaceGoal(CoelEntity fish) {
+        public SwimToRandomPlaceGoal(PiranhaEntity fish) {
             super(fish, 1.0, 40);
             this.fish = fish;
         }
@@ -365,16 +437,16 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     static class MateGoal
             extends AnimalMateGoal {
-        private final CoelEntity coel;
+        private final PiranhaEntity piranha;
 
-        MateGoal(CoelEntity coel, double speed) {
-            super(coel, speed);
-            this.coel = coel;
+        MateGoal(PiranhaEntity piranha, double speed) {
+            super(piranha, speed);
+            this.piranha = piranha;
         }
 
         @Override
         public boolean canStart() {
-            return super.canStart() && !this.coel.hasEgg();
+            return super.canStart() && !this.piranha.hasEgg();
         }
 
         @Override
@@ -387,7 +459,7 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
                 serverPlayerEntity.incrementStat(Stats.ANIMALS_BRED);
                 Criteria.BRED_ANIMALS.trigger(serverPlayerEntity, this.animal, this.mate, null);
             }
-            this.coel.setHasEgg(true);
+            this.piranha.setHasEgg(true);
             this.animal.setBreedingAge(6000);
             this.mate.setBreedingAge(6000);
             this.animal.resetLoveTicks();
@@ -401,16 +473,16 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
     static class LayEggGoal
             extends MoveToTargetPosGoal {
-        private final CoelEntity coel;
+        private final PiranhaEntity piranha;
 
-        LayEggGoal(CoelEntity coel, double speed) {
-            super(coel, speed, 16);
-            this.coel = coel;
+        LayEggGoal(PiranhaEntity piranha, double speed) {
+            super(piranha, speed, 16);
+            this.piranha = piranha;
         }
 
         @Override
         public boolean canStart() {
-            if (this.coel.hasEgg()) {
+            if (this.piranha.hasEgg()) {
                 return super.canStart();
             }
             return false;
@@ -418,22 +490,22 @@ public class CoelEntity extends AnimalEntity implements Bucketable {
 
         @Override
         public boolean shouldContinue() {
-            return super.shouldContinue() && this.coel.hasEgg();
+            return super.shouldContinue() && this.piranha.hasEgg();
         }
 
         @Override
         public void tick() {
             super.tick();
-            BlockPos blockPos = this.coel.getBlockPos();
-            if (this.coel.isTouchingWater() && this.hasReached()) {
-                    World world = this.coel.getWorld();
+            BlockPos blockPos = this.piranha.getBlockPos();
+            if (this.piranha.isTouchingWater() && this.hasReached()) {
+                    World world = this.piranha.getWorld();
                     world.playSound(null, blockPos, SoundEvents.ENTITY_FROG_LAY_SPAWN, SoundCategory.BLOCKS, 0.3f, 0.9f + world.random.nextFloat() * 0.2f);
                     BlockPos blockPos2 = this.targetPos.up();
-                    BlockState blockState = ModBlocks.COEL_EGG_BLOCK.getDefaultState();
+                    BlockState blockState = ModBlocks.PIRANHA_EGG_BLOCK.getDefaultState();
                     world.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
-                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.coel, blockState));
-                    this.coel.setHasEgg(false);
-                    this.coel.setLoveTicks(600);
+                    world.emitGameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Emitter.of(this.piranha, blockState));
+                    this.piranha.setHasEgg(false);
+                    this.piranha.setLoveTicks(600);
             }
         }
 

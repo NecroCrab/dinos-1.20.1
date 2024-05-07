@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.CoelEntity;
+import net.mikov.dinos.entity.custom.PiranhaEntity;
 import net.mikov.dinos.entity.custom.TrilobiteEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnRestriction;
@@ -123,6 +124,29 @@ public class ModEntitySpawn {
                 CoelEntity::canSpawn);
 
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.BADLANDS,
+                        BiomeKeys.DESERT,
+                        BiomeKeys.ERODED_BADLANDS,
+                        BiomeKeys.SAVANNA,
+                        BiomeKeys.SAVANNA_PLATEAU,
+                        BiomeKeys.WINDSWEPT_SAVANNA,
+                        BiomeKeys.WOODED_BADLANDS,
+                        BiomeKeys.FOREST,
+                        BiomeKeys.SWAMP,
+                        BiomeKeys.MANGROVE_SWAMP,
+                        BiomeKeys.JUNGLE,
+                        BiomeKeys.SPARSE_JUNGLE,
+                        BiomeKeys.DARK_FOREST,
+                        BiomeKeys.OLD_GROWTH_BIRCH_FOREST,
+                        BiomeKeys.FLOWER_FOREST,
+                        BiomeKeys.RIVER ),
+                SpawnGroup.WATER_CREATURE,
+                ModEntities.PIRANHA, 390, 3, 6);
+        SpawnRestriction.register(ModEntities.PIRANHA, SpawnRestriction.Location.IN_WATER,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                PiranhaEntity::canSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
                         BiomeKeys.PLAINS,
                         BiomeKeys.BADLANDS,
                         BiomeKeys.BEACH,
@@ -156,7 +180,7 @@ public class ModEntitySpawn {
                         BiomeKeys.OCEAN,
                         BiomeKeys.FROZEN_RIVER),
                 SpawnGroup.CREATURE,
-                ModEntities.TRILOBITE, 290, 2, 4);
+                ModEntities.TRILOBITE, 490, 2, 4);
         SpawnRestriction.register(ModEntities.TRILOBITE, SpawnRestriction.Location.ON_GROUND,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 AnimalEntity::isValidNaturalSpawn);

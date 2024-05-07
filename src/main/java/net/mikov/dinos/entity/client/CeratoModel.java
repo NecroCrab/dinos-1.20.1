@@ -165,8 +165,8 @@ public class CeratoModel<T extends CeratoEntity> extends SinglePartEntityModel<T
 	}
 
 	private void setHeadAngles(float headYaw, float headPitch) {
-		headYaw = MathHelper.clamp(headYaw, -10.0F, 10.0F);
-		headPitch = MathHelper.clamp(headPitch, -25, 45);
+		headYaw = MathHelper.clamp(headYaw, -30.0F, 30.0F);
+		headPitch = MathHelper.clamp(headPitch, -0, 0);
 
 		this.head.yaw = headYaw * 0.017453292F;
 		this.head.pitch = headPitch * 0.017453292F;

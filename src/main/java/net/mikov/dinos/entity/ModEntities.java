@@ -51,4 +51,9 @@ public class ModEntities {
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, CeratoEntity::new)
                     .dimensions(EntityDimensions.changing( 2.2f, 2.5f)).build());
 
+    public static final EntityType<PiranhaEntity> PIRANHA = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "piranha"),
+            FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE, PiranhaEntity::new)
+                    .dimensions(EntityDimensions.changing( 1f, 1f)).build());
+
 }

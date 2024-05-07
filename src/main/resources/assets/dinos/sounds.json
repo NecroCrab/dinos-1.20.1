@@ -18,6 +18,24 @@
       "dinos:bite-two"
     ]
   },
+  "cerato_attack": {
+    "subtitle": "sounds.dinos.cerato_attack",
+    "sounds": [
+      "dinos:cerato_attack"
+    ]
+  },
+  "cerato_hurt": {
+    "subtitle": "sounds.dinos.cerato_hurt",
+    "sounds": [
+      "dinos:cerato_hurt"
+    ]
+  },
+  "cerato_ambient": {
+    "subtitle": "sounds.dinos.cerato_ambient",
+    "sounds": [
+      "dinos:dino-growl"
+    ]
+  },
   "dodo_ambient": {
     "subtitle": "sounds.dinos.dodo_ambient",
     "sounds": [

@@ -12,7 +12,11 @@ public class ModFoodComponents {
             .statusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 400), 1f).build();
     public static final FoodComponent RAW_COEL = new FoodComponent.Builder().hunger(2).saturationModifier(0.25f)
             .statusEffect(new StatusEffectInstance(StatusEffects.SATURATION, 200), 0.2f).build();
-    public static final FoodComponent COOKED_COEL = new FoodComponent.Builder().hunger(6).saturationModifier(0.35f)
+    public static final FoodComponent COOKED_COEL = new FoodComponent.Builder().hunger(5).saturationModifier(0.35f)
             .statusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 400), 0.65f).build();
+    public static final FoodComponent RAW_PIRANHA = new FoodComponent.Builder().hunger(4).saturationModifier(0.25f)
+            .statusEffect(new StatusEffectInstance(StatusEffects.SATURATION, 200), 0.2f).build();
+    public static final FoodComponent COOKED_PIRANHA = new FoodComponent.Builder().hunger(6).saturationModifier(0.35f)
+            .statusEffect(new StatusEffectInstance(StatusEffects.HASTE, 500), 0.65f).build();
 
 }
