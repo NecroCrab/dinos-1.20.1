@@ -28,27 +28,27 @@ public class DodoModel<T extends DodoEntity> extends SinglePartEntityModel<T> {
 
 		ModelPartData body = controller.addChild("body", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, -8.0F, 0.0F));
 
-		ModelPartData body_r1 = body.addChild("body_r1", ModelPartBuilder.create().uv(0, 9).cuboid(-3.0F, -4.0F, -4.0F, 6.0F, 8.0F, 7.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 1.5708F, 0.0F, 0.0F));
+		ModelPartData body_r1 = body.addChild("body_r1", ModelPartBuilder.create().uv(1, 11).cuboid(-3.0F, -4.0F, -4.0F, 6.0F, 8.0F, 7.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 1.5708F, 0.0F, 0.0F));
 
-		ModelPartData head = body.addChild("head", ModelPartBuilder.create().uv(0, 0).cuboid(-2.0F, -6.0F, -2.0F, 4.0F, 6.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -1.0F, -4.0F));
+		ModelPartData head = body.addChild("head", ModelPartBuilder.create().uv(2, 0).cuboid(-2.0F, -6.0F, -2.0F, 4.0F, 6.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -1.0F, -4.0F));
 
-		ModelPartData beak = head.addChild("beak", ModelPartBuilder.create().uv(15, 0).cuboid(-1.0F, -4.0F, -5.0F, 2.0F, 2.0F, 3.0F, new Dilation(0.25F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		ModelPartData beak = head.addChild("beak", ModelPartBuilder.create().uv(17, 0).cuboid(-1.0F, -4.0F, -5.0F, 2.0F, 2.0F, 3.0F, new Dilation(0.25F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
-		ModelPartData tip = beak.addChild("tip", ModelPartBuilder.create().uv(22, 10).cuboid(-1.0F, -2.0F, -2.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.05F)), ModelTransform.pivot(0.0F, -1.0F, -3.0F));
+		ModelPartData tip = beak.addChild("tip", ModelPartBuilder.create().uv(24, 12).cuboid(-1.0F, -2.0F, -2.0F, 2.0F, 2.0F, 1.0F, new Dilation(-0.05F)), ModelTransform.pivot(0.0F, -1.0F, -3.0F));
 
-		ModelPartData jaw = beak.addChild("jaw", ModelPartBuilder.create().uv(34, 10).cuboid(-1.0F, -2.0F, -4.0F, 2.0F, 1.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		ModelPartData jaw = beak.addChild("jaw", ModelPartBuilder.create().uv(42, 0).cuboid(-1.0F, -2.0F, -4.0F, 2.0F, 1.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
-		ModelPartData leg0 = body.addChild("leg0", ModelPartBuilder.create().uv(26, 0).cuboid(-1.0F, 0.0F, -3.0F, 3.0F, 5.0F, 3.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, 3.0F, 1.0F, 0.0F, 0.2618F, 0.0F));
+		ModelPartData leg0 = body.addChild("leg0", ModelPartBuilder.create().uv(31, 26).cuboid(-1.0F, 0.0F, -3.0F, 3.0F, 5.0F, 3.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, 3.0F, 1.0F, 0.0F, 0.2618F, 0.0F));
 
-		ModelPartData leg1 = body.addChild("leg1", ModelPartBuilder.create().uv(26, 0).cuboid(-1.0F, 0.0F, -3.0F, 3.0F, 5.0F, 3.0F, new Dilation(0.0F)), ModelTransform.of(2.0F, 3.0F, 1.0F, 0.0F, -0.2618F, 0.0F));
+		ModelPartData leg1 = body.addChild("leg1", ModelPartBuilder.create().uv(28, 0).cuboid(-1.0F, 0.0F, -3.0F, 3.0F, 5.0F, 3.0F, new Dilation(0.0F)), ModelTransform.of(2.0F, 3.0F, 1.0F, 0.0F, -0.2618F, 0.0F));
 
-		ModelPartData wing0 = body.addChild("wing0", ModelPartBuilder.create().uv(23, 12).cuboid(-1.0F, 0.0F, -4.0F, 1.0F, 4.0F, 7.0F, new Dilation(0.1F)), ModelTransform.pivot(-3.0F, -3.0F, 0.0F));
+		ModelPartData wing0 = body.addChild("wing0", ModelPartBuilder.create().uv(29, 12).cuboid(-1.0F, 0.0F, -4.0F, 1.0F, 4.0F, 7.0F, new Dilation(0.1F)), ModelTransform.pivot(-3.0F, -3.0F, 0.0F));
 
-		ModelPartData wing1 = body.addChild("wing1", ModelPartBuilder.create().uv(23, 12).cuboid(0.0F, 0.0F, -4.0F, 1.0F, 4.0F, 7.0F, new Dilation(0.1F)), ModelTransform.pivot(3.0F, -3.0F, 0.0F));
+		ModelPartData wing1 = body.addChild("wing1", ModelPartBuilder.create().uv(29, 12).cuboid(0.0F, 0.0F, -4.0F, 1.0F, 4.0F, 7.0F, new Dilation(0.1F)), ModelTransform.pivot(3.0F, -3.0F, 0.0F));
 
-		ModelPartData tail = body.addChild("tail", ModelPartBuilder.create().uv(12, 16).cuboid(-2.0F, -2.0F, 0.0F, 4.0F, 2.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -2.0F, 3.0F));
+		ModelPartData tail = body.addChild("tail", ModelPartBuilder.create().uv(1, 27).cuboid(-2.0F, -2.0F, 0.0F, 4.0F, 2.0F, 3.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -2.0F, 3.0F));
 
-		return TexturedModelData.of(modelData, 64, 32);
+		return TexturedModelData.of(modelData, 64, 64);
 	}
 
 	@Override

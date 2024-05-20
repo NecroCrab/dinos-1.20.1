@@ -31,4 +31,13 @@ public class ModModelLayers {
 
     public static final EntityModelLayer PIRANHA =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "piranha"), "main");
+
+    public static final EntityModelLayer MEGALANIA =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "megalania"), "main");
+
+    public static final EntityModelLayer BRONTO =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "bronto"), "main");
+
+    public static final EntityModelLayer MEGANEURA =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "meganeura"), "main");
 }

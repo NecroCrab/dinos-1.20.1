@@ -257,7 +257,7 @@ public class CeratoEntity extends AbstractDonkeyEntity
 
     public static DefaultAttributeContainer.Builder createCeratoAttributes() {
         return AbstractDonkeyEntity.createBaseHorseAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 70)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 40)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 6)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
@@ -275,7 +275,7 @@ public class CeratoEntity extends AbstractDonkeyEntity
     }
 
     protected static float getChildHealthBonus(IntUnaryOperator randomIntGetter) {
-        return 70.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
+        return 40.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
     }
 
     @Override

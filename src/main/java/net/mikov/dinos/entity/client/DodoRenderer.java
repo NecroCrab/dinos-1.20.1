@@ -9,7 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class DodoRenderer extends MobEntityRenderer<DodoEntity, DodoModel<DodoEntity>> {
-    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/dodo.png");
+    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/grey_dodo.png");
 
     public DodoRenderer(EntityRendererFactory.Context context) {
         super(context, new DodoModel<>(context.getPart(ModModelLayers.DODO)), 0.25f);

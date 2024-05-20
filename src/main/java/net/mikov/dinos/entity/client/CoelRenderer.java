@@ -9,7 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class CoelRenderer extends MobEntityRenderer<CoelEntity, CoelModel<CoelEntity>> {
-    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/coel_texture.png");
+    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/coel_texture_new.png");
 
     public CoelRenderer(EntityRendererFactory.Context context) {
         super(context, new CoelModel<>(context.getPart(ModModelLayers.COEL)), 0.25f);

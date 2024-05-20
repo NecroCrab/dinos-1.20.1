@@ -112,19 +112,19 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     }
 
     private void setupAnimationStates() {
-        if (this.isOnGround() && this.idleAnimationTimeout <= 0) {
+        if (this.isOnGround() && this.getVelocity().length() == 0.00 && this.idleAnimationTimeout <= 0) {
             idleAnimationTimeout = this.random.nextInt(1180) + 80;
             idleAnimationState.start(this.age);
         } else {
             --this.idleAnimationTimeout;
         }
-        if (this.isInAir() && this.flyingAnimationTimeout <= 0) {
+        if (!this.isOnGround() && this.flyingAnimationTimeout <= 0) {
             flyingAnimationTimeout = this.random.nextInt(1180) + 80;
             flyingAnimationState.start(this.age);
         } else {
             --this.flyingAnimationTimeout;
         }
-        if (this.isOnGround() && this.getVelocity().length() >= 0.02 && this.walkingAnimationTimeout <= 0) {
+        if (this.isOnGround() && this.getVelocity().length() >= 0.01 && this.walkingAnimationTimeout <= 0) {
             walkingAnimationTimeout = this.random.nextInt(1180) + 40;
             walkingAnimationState.start(this.age);
         } else {
@@ -187,14 +187,14 @@ public class DimorphEntity extends TameableEntity implements Tameable {
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new SitGoal(this));
-        this.goalSelector.add(3, new MateGoal(this, 1.0));
-        this.goalSelector.add(3, new LayEggGoal(this, 1.0));
+        this.goalSelector.add(2, new MateGoal(this, 1.0));
+        this.goalSelector.add(2, new LayEggGoal(this, 1.0));
         this.goalSelector.add(3, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
         this.goalSelector.add(4, new TemptGoal(this, 1.0, BREEDING_INGREDIENT, false));
         this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(6, new DimorphAttackGoal(this, 1.15, true));
         this.goalSelector.add(7, new FlyOntoTreeGoal(this, 1.0));
-        this.goalSelector.add(8, new FlyRandomlyGoal(this));
+        //this.goalSelector.add(8, new FlyRandomlyGoal(this));
         this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
         this.goalSelector.add(9, new LookAtEntityGoal(this, PlayerEntity.class, 6.0f));
         this.goalSelector.add(10, new LookAroundGoal(this));

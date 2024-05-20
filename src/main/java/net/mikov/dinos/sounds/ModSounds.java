@@ -16,6 +16,14 @@ public class ModSounds {
     public static SoundEvent CERATO_ATTACK = registerSound("cerato_attack");
     public static SoundEvent CERATO_HURT = registerSound("cerato_hurt");
     public static SoundEvent CERATO_AMBIENT = registerSound("cerato_ambient");
+    public static SoundEvent MEGALANIA_ATTACK = registerSound("megalania_attack");
+    public static SoundEvent MEGALANIA_HURT = registerSound("megalania_hurt");
+    public static SoundEvent MEGALANIA_AMBIENT = registerSound("megalania_ambient");
+    public static SoundEvent MEGALANIA_DEATH = registerSound("megalania_death");
+    public static SoundEvent BRONTO_ATTACK = registerSound("bronto_attack");
+    public static SoundEvent BRONTO_HURT = registerSound("bronto_hurt");
+    public static SoundEvent BRONTO_AMBIENT = registerSound("bronto_ambient");
+    public static SoundEvent BRONTO_DEATH = registerSound("bronto_death");
 
     static SoundEvent registerSound(String id) {
         SoundEvent sound = SoundEvent.of(new Identifier(Dinos.MOD_ID, id));

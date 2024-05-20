@@ -4,13 +4,15 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.mikov.dinos.Dinos;
 import net.mikov.dinos.block.custom.*;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BeehiveBlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.intprovider.UniformIntProvider;
 
 public class ModBlocks {
 
@@ -32,6 +34,28 @@ public class ModBlocks {
             new CeratoEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
     public static final Block PIRANHA_EGG_BLOCK = registerBlock( "piranha_egg_block",
             new PiranhaEggBlock(FabricBlockSettings.copyOf(Blocks.FROGSPAWN)));
+    public static final Block MEGALANIA_EGG_BLOCK = registerBlock( "megalania_egg_block",
+            new MegalaniaEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block BRONTO_EGG_BLOCK = registerBlock( "bronto_egg_block",
+            new BrontoEggBlock(FabricBlockSettings.copyOf(Blocks.SNIFFER_EGG)));
+    public static final Block MEGANEURA_EGG_BLOCK = registerBlock( "meganeura_egg_block",
+            new MeganeuraEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+
+    public static final Block MEGANEURA_HIVE_BLOCK = registerBlock( "meganeura_hive_block",
+            new MeganeuraHiveBlock(FabricBlockSettings.copyOf(Blocks.BEEHIVE)));
+
+    public static final Block EXTRACTOR_BLOCK = registerBlock( "extractor_block",
+            new ExtractorBlock(FabricBlockSettings.copyOf(Blocks.CRAFTING_TABLE).nonOpaque()));
+
+    public static final Block SILT_BLOCK = registerBlock( "silt_block",
+            new GravelBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL)));
+    public static final Block FOSSIL_BLOCK = registerBlock( "fossil_block",
+            new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).requiresTool().strength(1.0f, 1.0f), UniformIntProvider.create(3, 7)));
+    public static final Block DEEPSLATE_FOSSIL_BLOCK = registerBlock( "deepslate_fossil_block",
+            new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).requiresTool().strength(1.0f, 1.0f), UniformIntProvider.create(3, 7)));
+
+    public static final Block TRILOBITE_FOSSIL_BLOCK = registerBlock( "trilobite_fossil_block",
+            new Block(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).nonOpaque()));
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);

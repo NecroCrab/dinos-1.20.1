@@ -2,31 +2,15 @@ package net.mikov.dinos;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.mikov.dinos.block.ModBlocks;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.*;
-import net.mikov.dinos.gui.MountScreen;
-import net.mikov.dinos.gui.MountScreenHandler;
 import net.mikov.dinos.item.ModItems;
-import net.mikov.dinos.registry.FishingLoot;
 import net.mikov.dinos.sounds.ModSounds;
-import net.mikov.dinos.world.gen.ModEntitySpawn;
+import net.mikov.dinos.util.ModLootTableModifiers;
 import net.mikov.dinos.world.gen.ModWorldGen;
-import net.minecraft.client.gui.screen.ingame.HorseScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTables;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.network.NetworkThreadUtils;
-import net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket;
-import net.minecraft.screen.HorseScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Identifier;
+import net.mikov.dinos.world.gen.ModWorldOreGen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,11 +38,15 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.TRILOBITE, TrilobiteEntity.createTriloAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.CERATO, CeratoEntity.createCeratoAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.PIRANHA, PiranhaEntity.createPiranhaAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.MEGALANIA, MegalaniaEntity.createMegalaniaAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.BRONTO, BrontoEntity.createBrontoAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.MEGANEURA, MeganeuraEntity.createMeganeuraAttributes());
 
 		ModWorldGen.generateWorldGen();
-		FishingLoot.registerFishingLoot();
 		ModBlocks.registerModBlocks();
 		ModItems.registerModItems();
 		ModSounds.registerSounds();
+		ModWorldOreGen.generateModWorldOres();
+		ModLootTableModifiers.modifyLootTables();
 	}
 }

@@ -35,6 +35,12 @@ public class ModItems {
             new SpawnEggItem(ModEntities.CERATO, 0xA80E0E, 0xFCC369, new FabricItemSettings()));
     public static final Item PIRANHA_SPAWN_EGG = registerItem( "piranha_spawn_egg",
             new SpawnEggItem(ModEntities.PIRANHA, 0x5F6464, 0x85F1BC, new FabricItemSettings()));
+    public static final Item MEGALANIA_SPAWN_EGG = registerItem( "megalania_spawn_egg",
+            new SpawnEggItem(ModEntities.MEGALANIA, 0x6E6E6E, 0x315234, new FabricItemSettings()));
+    public static final Item BRONTO_SPAWN_EGG = registerItem( "bronto_spawn_egg",
+            new SpawnEggItem(ModEntities.BRONTO, 0x456296, 0x6E6E6E, new FabricItemSettings()));
+    public static final Item MEGANEURA_SPAWN_EGG = registerItem( "meganeura_spawn_egg",
+            new SpawnEggItem(ModEntities.MEGANEURA, 0x315234, 0xF9F9F9, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -59,6 +65,10 @@ public class ModItems {
         entries.add(PIRANHA_BUCKET);
     }
 
+    public static void addItemsToFunctionalItemGroup(FabricItemGroupEntries entries) {
+        entries.add(ModBlocks.EXTRACTOR_BLOCK);
+    }
+
     public static void addItemsToSpawnEggItemGroup(FabricItemGroupEntries entries) {
         entries.add(TREX_SPAWN_EGG);
         entries.add(DODO_SPAWN_EGG);
@@ -69,6 +79,9 @@ public class ModItems {
         entries.add(TRILOBITE_SPAWN_EGG);
         entries.add(CERATO_SPAWN_EGG);
         entries.add(PIRANHA_SPAWN_EGG);
+        entries.add(MEGALANIA_SPAWN_EGG);
+        entries.add(BRONTO_SPAWN_EGG);
+        entries.add(MEGANEURA_SPAWN_EGG);
     }
 
     public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
@@ -81,6 +94,17 @@ public class ModItems {
         entries.add(ModBlocks.COEL_EGG_BLOCK);
         entries.add(ModBlocks.CERATO_EGG_BLOCK);
         entries.add(ModBlocks.PIRANHA_EGG_BLOCK);
+        entries.add(ModBlocks.MEGALANIA_EGG_BLOCK);
+        entries.add(ModBlocks.BRONTO_EGG_BLOCK);
+        entries.add(ModBlocks.MEGANEURA_EGG_BLOCK);
+
+        entries.add(ModBlocks.MEGANEURA_HIVE_BLOCK);
+
+        entries.add(ModBlocks.FOSSIL_BLOCK);
+        entries.add(ModBlocks.DEEPSLATE_FOSSIL_BLOCK);
+        entries.add(ModBlocks.SILT_BLOCK);
+
+        entries.add(ModBlocks.TRILOBITE_FOSSIL_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {
@@ -93,5 +117,6 @@ public class ModItems {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(ModItems::addItemsToFoodItemGroup);
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(ModItems::addItemsToSpawnEggItemGroup);
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(ModItems::addItemsToNaturalItemGroup);
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(ModItems::addItemsToFunctionalItemGroup);
     }
 }

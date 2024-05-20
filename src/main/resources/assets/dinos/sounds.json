@@ -36,6 +36,56 @@
       "dinos:dino-growl"
     ]
   },
+  "megalania_attack": {
+    "subtitle": "sounds.dinos.megalania_attack",
+    "sounds": [
+      "dinos:megalania_attack"
+    ]
+  },
+  "megalania_hurt": {
+    "subtitle": "sounds.dinos.megalania_hurt",
+    "sounds": [
+      "dinos:megalania_hurt"
+    ]
+  },
+  "megalania_ambient": {
+    "subtitle": "sounds.dinos.megalania_ambient",
+    "sounds": [
+      "dinos:megalania_ambient"
+    ]
+  },
+  "megalania_death": {
+    "subtitle": "sounds.dinos.megalania_death",
+    "sounds": [
+      "dinos:megalania_death"
+    ]
+  },
+  "bronto_attack": {
+    "subtitle": "sounds.dinos.bronto_attack",
+    "sounds": [
+      "dinos:bronto_attack"
+    ]
+  },
+  "bronto_hurt": {
+    "subtitle": "sounds.dinos.bronto_hurt",
+    "sounds": [
+      "dinos:bronto_hurt"
+    ]
+  },
+  "bronto_ambient": {
+    "subtitle": "sounds.dinos.bronto_ambient",
+    "sounds": [
+      "dinos:bronto_ambient",
+      "dinos:bronto_ambient_two",
+      "dinos:bronto_ambient_three"
+    ]
+  },
+  "bronto_death": {
+    "subtitle": "sounds.dinos.bronto_death",
+    "sounds": [
+      "dinos:bronto_death"
+    ]
+  },
   "dodo_ambient": {
     "subtitle": "sounds.dinos.dodo_ambient",
     "sounds": [

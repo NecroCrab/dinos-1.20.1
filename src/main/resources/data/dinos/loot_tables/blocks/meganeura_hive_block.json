@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "enchantments": [
+              {
+                "enchantment": "minecraft:silk_touch",
+                "levels": {
+                  "min": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "Bees",
+                  "target": "BlockEntityTag.Bees"
+                }
+              ],
+              "source": "block_entity"
+            },
+            {
+              "block": "dinos:meganeura_hive_block",
+              "function": "minecraft:copy_state",
+              "properties": [
+                "honey_level"
+              ]
+            }
+          ],
+          "name": "dinos:meganeura_hive_block"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "dinos:blocks/meganeura_hive_block"
+}

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#SB",
+        "OOO",
+        "O O"
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:grindstone"
+        },
+        "S": {
+            "item": "minecraft:spyglass"
+        },
+        "B": {
+            "item": "minecraft:brush"
+        },
+        "O": {
+            "tag": "minecraft:planks"
+        }
+    },
+    "result": {
+        "item": "dinos:extractor_block",
+        "count": 1
+    }
+}

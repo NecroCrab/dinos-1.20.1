@@ -1,0 +1,11 @@
+{
+  "parent": "dinos:block/template_large_egg",
+  "textures": {
+    "bottom": "dinos:block/bronto_egg_slightly_cracked_bottom",
+    "east": "dinos:block/bronto_egg_slightly_cracked_east",
+    "north": "dinos:block/bronto_egg_slightly_cracked_north",
+    "south": "dinos:block/bronto_egg_slightly_cracked_south",
+    "top": "dinos:block/bronto_egg_slightly_cracked_top",
+    "west": "dinos:block/bronto_egg_slightly_cracked_west"
+  }
+}

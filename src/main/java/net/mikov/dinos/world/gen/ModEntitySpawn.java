@@ -8,6 +8,7 @@ import net.mikov.dinos.entity.custom.PiranhaEntity;
 import net.mikov.dinos.entity.custom.TrilobiteEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnRestriction;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.FishEntity;
@@ -199,6 +200,47 @@ public class ModEntitySpawn {
                 SpawnGroup.CREATURE,
                 ModEntities.CERATO, 80, 1, 4);
         SpawnRestriction.register(ModEntities.CERATO, SpawnRestriction.Location.ON_GROUND,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                AnimalEntity::isValidNaturalSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.SWAMP,
+                        BiomeKeys.MANGROVE_SWAMP,
+                        BiomeKeys.JUNGLE,
+                        BiomeKeys.SPARSE_JUNGLE,
+                        BiomeKeys.DARK_FOREST,
+                        BiomeKeys.LUSH_CAVES,
+                        BiomeKeys.DRIPSTONE_CAVES,
+                        BiomeKeys.DEEP_DARK,
+                        BiomeKeys.RIVER ),
+                SpawnGroup.CREATURE,
+                ModEntities.MEGALANIA, 80, 1, 2);
+        SpawnRestriction.register(ModEntities.MEGALANIA, SpawnRestriction.Location.ON_GROUND,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                MobEntity::canMobSpawn);
+
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(
+                        BiomeKeys.PLAINS,
+                        BiomeKeys.BADLANDS,
+                        BiomeKeys.SWAMP,
+                        BiomeKeys.FOREST,
+                        BiomeKeys.ERODED_BADLANDS,
+                        BiomeKeys.SAVANNA,
+                        BiomeKeys.FLOWER_FOREST,
+                        BiomeKeys.SPARSE_JUNGLE,
+                        BiomeKeys.BIRCH_FOREST,
+                        BiomeKeys.WINDSWEPT_SAVANNA,
+                        BiomeKeys.WOODED_BADLANDS,
+                        BiomeKeys.GROVE,
+                        BiomeKeys.MEADOW,
+                        BiomeKeys.OLD_GROWTH_PINE_TAIGA,
+                        BiomeKeys.OLD_GROWTH_BIRCH_FOREST,
+                        BiomeKeys.SUNFLOWER_PLAINS,
+                        BiomeKeys.TAIGA,
+                        BiomeKeys.CHERRY_GROVE ),
+                SpawnGroup.CREATURE,
+                ModEntities.BRONTO, 20, 1, 4);
+        SpawnRestriction.register(ModEntities.BRONTO, SpawnRestriction.Location.ON_GROUND,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 AnimalEntity::isValidNaturalSpawn);
     }

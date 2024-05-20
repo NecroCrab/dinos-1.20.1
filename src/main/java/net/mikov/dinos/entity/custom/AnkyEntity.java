@@ -199,10 +199,10 @@ public class AnkyEntity extends AbstractDonkeyEntity
 
     public static DefaultAttributeContainer.Builder createAnkyAttributes() {
         return AbstractDonkeyEntity.createBaseHorseAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 120)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 60)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.1)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 8)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 8)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 10)
@@ -217,7 +217,7 @@ public class AnkyEntity extends AbstractDonkeyEntity
     }
 
     protected static float getChildHealthBonus(IntUnaryOperator randomIntGetter) {
-        return 120.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
+        return 60.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
     }
 
     @Override

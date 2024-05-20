@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "dinos:block/deepslate_fossil_block"
+    }
+  }
+}

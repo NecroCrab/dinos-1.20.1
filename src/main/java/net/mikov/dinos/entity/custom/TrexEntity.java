@@ -119,6 +119,10 @@ public class TrexEntity extends AbstractDonkeyEntity
                 entityType == EntityType.WITCH ||
                 entityType == ModEntities.DODO ||
                 entityType == ModEntities.ANKY ||
+                entityType == ModEntities.MEGALANIA ||
+                entityType == ModEntities.CERATO ||
+                entityType == ModEntities.DIMORPH ||
+                entityType == ModEntities.BRONTO ||
                 entityType == EntityType.PIG;
     };
 
@@ -268,7 +272,7 @@ public class TrexEntity extends AbstractDonkeyEntity
 
     public static DefaultAttributeContainer.Builder createTrexAttributes() {
         return AbstractDonkeyEntity.createBaseHorseAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 200)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 80)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
@@ -286,7 +290,7 @@ public class TrexEntity extends AbstractDonkeyEntity
     }
 
     protected static float getChildHealthBonus(IntUnaryOperator randomIntGetter) {
-        return 200.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
+        return 80.0f + (float)randomIntGetter.applyAsInt(8) + (float)randomIntGetter.applyAsInt(9);
     }
 
     @Override

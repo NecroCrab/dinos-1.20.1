@@ -37,5 +37,14 @@ public class DinosClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.PIRANHA, PiranhaRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.PIRANHA, PiranhaModel::getTexturedModelData);
 
+        EntityRendererRegistry.register(ModEntities.MEGALANIA, MegalaniaRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.MEGALANIA, MegalaniaModel::getTexturedModelData);
+
+        EntityRendererRegistry.register(ModEntities.BRONTO, BrontoRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.BRONTO, BrontoModel::getTexturedModelData);
+
+        EntityRendererRegistry.register(ModEntities.MEGANEURA, MeganeuraRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.MEGANEURA, MeganeuraModel::getTexturedModelData);
+
     }
 }

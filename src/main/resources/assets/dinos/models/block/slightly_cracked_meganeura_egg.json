@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_small_egg",
+  "textures": {
+    "all": "dinos:block/meganeura_egg_slightly_cracked"
+  }
+}

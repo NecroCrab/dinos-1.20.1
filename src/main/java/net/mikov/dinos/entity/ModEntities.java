@@ -14,7 +14,7 @@ public class ModEntities {
     public static final EntityType<TrexEntity> TREX = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "trex"),
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TrexEntity::new)
-                    .dimensions(EntityDimensions.changing( 4f, 5f)).build());
+                    .dimensions(EntityDimensions.changing( 4f, 5.5f)).build());
 
     public static final EntityType<DodoEntity> DODO = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "dodo"),
@@ -54,6 +54,21 @@ public class ModEntities {
     public static final EntityType<PiranhaEntity> PIRANHA = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(Dinos.MOD_ID, "piranha"),
             FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE, PiranhaEntity::new)
+                    .dimensions(EntityDimensions.changing( 1f, 1f)).build());
+
+    public static final EntityType<MegalaniaEntity> MEGALANIA = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "megalania"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, MegalaniaEntity::new)
+                    .dimensions(EntityDimensions.changing( 2.5f, 1.75f)).build());
+
+    public static final EntityType<BrontoEntity> BRONTO = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "bronto"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, BrontoEntity::new)
+                    .dimensions(EntityDimensions.changing( 4f, 7f)).build());
+
+    public static final EntityType<MeganeuraEntity> MEGANEURA = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "meganeura"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, MeganeuraEntity::new)
                     .dimensions(EntityDimensions.changing( 1f, 1f)).build());
 
 }
