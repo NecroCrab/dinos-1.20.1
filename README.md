@@ -1,7 +1,10 @@
 ## Fabric - 1.20.1
 
 Inspired by popular medias such as Ark:SE, Jurassic Park, and my own love of Dinosaurs and prehistory!
-This mod will add 9 naturally spawning Animals to the Overworld, that can be ridden, used as food or other resource, breed, and interact with other entities.
+
+**_I use the term "Dinosaur" quite loosely, as really these are just prehistoric creatures; Theropods, Pterosaurs, Invertebrates, and Fishes, but I hope you enjoy them!_**
+
+This mod will add 9 naturally spawning Animals to the Overworld, that can be ridden, used as food or resources, breed, and interact with other entities. Further details can be found on the [Wiki](https://github.com/NecroCrab/dinos-1.20.1/wiki).
 
 Entities
 <details>
@@ -12,15 +15,16 @@ Entities
 ![Dodo](https://cdn.modrinth.com/data/cached_images/6faa7215f497e37be40ec72e625a2c56f1cb30d9.png)
 -  Coelacanth - Any water - Passive - Nests in water
 
-![Coelacanth](https://cdn.modrinth.com/data/cached_images/5e40d92523869b13d564f3b0c67aef23bce4dd47.png)
+![Coelacanth_new](https://cdn.modrinth.com/data/cached_images/6d6bf182af0a9e1ea4e51dbb33f4997e56281147.png)
 -  Trilobite - Water's edge - Passive - Nests on Sand
 
+![Trilobite_new](https://cdn.modrinth.com/data/cached_images/c7e61f48decb6100e7c0d13d5b6cf20cd0f1c767.png)
 -  Compsognathus - Forest / Grassy - Neutral - Nests on Dirt
   
 ![Compy](https://cdn.modrinth.com/data/cached_images/77724c7d34ab4e2f313d4cca2e6f43cc1c65b916.png)
 -  Dimorphodon - Forest / Swamp - Neutral - Nests on Leaves
 
-![Dimorphodon](https://cdn.modrinth.com/data/cached_images/b4be56a8309bc954a53e3b714a7028f22683ec9f.png)
+![Dimorph_new](https://cdn.modrinth.com/data/cached_images/70130fd023fd8087aec5e14b18971ce742f4d296.png)
 -  Ankylosaurus - Plains / Warmer climates - Neutral - Nests on Dirt
 
 ![Anky](https://cdn.modrinth.com/data/cached_images/a84ed7b6433784f235bc16aa6defe2a93edd0f3f.png)
@@ -57,13 +61,19 @@ Small + Medium eggs require silk touch to mine, Large + Aquatic eggs can be mine
 </details>
 
 Feedback and suggestions are always welcome and appreciated! This mod is still in early development, and there is much to do that can be improved.
-- Proper Taming
-- Prehistoric dimension
+- Prehistoric Dimension
 - Improved Textures
-- Fossils, processing stations, advancements, and decorations
+- Custom Advancements
+- Language Translations
 - Bigger, better dinosaurs! Leave your suggestions on Discord!
 
+[https://www.bisecthosting.com/clients/aff.php?aff=6255](https://www.bisecthosting.com/clients/aff.php?aff=6255)
+
+<a href="https://shockbyte.com/billing/aff.php?aff=10051"><img src="https://shockbyte.com/assets/img/partners/twitch/shockbyte_affiliate.png" alt="Minecraft Server Hosting" /></a>
+
 ### **SUPPORT**
-This is my first public mod, but this is a passion project, and I would love to work alongside other passionate creators, as well. Please don't hesitate to improve this project in any way you can! Artists, Programmers, ModDevs, and Hobbyists alike
+This is my first public mod, but this is a passion project, and I would love to work alongside other passionate creators, as well. Please don't hesitate to improve this project in any way you can! Artists, Programmers, Writers, ModDevs, and Hobbyists alike. This means models, textures, mechanics, translators, compatibilities, promotion, or even just your suggestions of how you think this project could be better.
+
 All Assets and Code can be reuploaded provided some credit is linked back here!
 
+If you would like to support the ongoing development of this project, you could buy me a coffee, via [Paypal](https://paypal.me/necrocrab?country.x=GB&locale.x=en_GB)
