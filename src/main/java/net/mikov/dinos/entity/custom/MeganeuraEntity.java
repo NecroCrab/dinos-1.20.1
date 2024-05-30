@@ -2,16 +2,14 @@ package net.mikov.dinos.entity.custom;
 
 import com.google.common.collect.Lists;
 import net.mikov.dinos.block.ModBlocks;
-import net.mikov.dinos.block.custom.DimorphEggBlock;
 import net.mikov.dinos.block.custom.MeganeuraEggBlock;
-import net.mikov.dinos.block.custom.MeganeuraHiveBlockEntity;
+import net.mikov.dinos.block.entity.MeganeuraHiveBlockEntity;
+import net.mikov.dinos.block.entity.ModBlockEntities;
 import net.mikov.dinos.entity.ModEntities;
-import net.mikov.dinos.entity.ai.DimorphAttackGoal;
 import net.mikov.dinos.entity.ai.MeganeuraAttackGoal;
 import net.mikov.dinos.item.ModItems;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
-import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.DoubleBlockHalf;
@@ -22,7 +20,6 @@ import net.minecraft.entity.ai.NoPenaltySolidTargeting;
 import net.minecraft.entity.ai.NoWaterTargeting;
 import net.minecraft.entity.ai.control.FlightMoveControl;
 import net.minecraft.entity.ai.control.LookControl;
-import net.minecraft.entity.ai.control.MoveControl;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.ai.pathing.BirdNavigation;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
@@ -40,16 +37,15 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.BeeEntity;
 import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.PointOfInterestTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -58,8 +54,10 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.TimeHelper;
 import net.minecraft.util.annotation.Debug;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.*;
 import net.minecraft.world.event.GameEvent;
@@ -67,40 +65,17 @@ import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MeganeuraEntity extends BeeEntity implements Angerable,
-        Flutterer {
+public class MeganeuraEntity extends AnimalEntity implements Angerable {
     private static final TrackedData<Boolean> HAS_EGG = DataTracker.registerData(MeganeuraEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> DIGGING_DIRT = DataTracker.registerData(MeganeuraEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     int dirtDiggingCounter;
-    private int cannotEnterHiveTicks;
-    private int cropsGrownSincePollination;
-    @Nullable
-    BlockPos hivePos;
-    int ticksLeftToFindHive;
-    int ticksUntilCanPollinate;
-    int ticksSincePollination;
-    @Nullable
-    PollinateGoal pollinateGoal;
-    MoveToHiveGoal moveToHiveGoal;
-    MoveToFlowerGoal moveToFlowerGoal;
-    @Nullable
-    BlockPos flowerPos;
-    private static final TrackedData<Byte> BEE_FLAGS = DataTracker.registerData(MeganeuraEntity.class, TrackedDataHandlerRegistry.BYTE);
-    private static final int NEAR_TARGET_FLAG = 2;
-    private static final int HAS_STUNG_FLAG = -1;
-    private static final int HAS_NECTAR_FLAG = 8;
-
     private static final Ingredient BREEDING_INGREDIENT = Ingredient.ofItems
             (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT);
-
     public static final Predicate<LivingEntity> FOLLOW_PREDICATE = entity -> {
         EntityType<?> entityType = entity.getType();
         return entityType == EntityType.CHICKEN ||
@@ -127,12 +102,48 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
     private float flapSpeed = 1.0f;
     private float field_28640 = 1.0f;
 
-    public MeganeuraEntity(EntityType<? extends BeeEntity> entityType, World world) {
+    PollinateGoal pollinateGoal;
+    MoveToHiveGoal moveToHiveGoal;
+    private MoveToFlowerGoal moveToFlowerGoal;
+    private int cropsGrownSincePollination;
+    private float lastPitch;
+    private float currentPitch;
+    private static final TrackedData<Byte> BEE_FLAGS = DataTracker.registerData(MeganeuraEntity.class, TrackedDataHandlerRegistry.BYTE);
+    private static final TrackedData<Integer> ANGER = DataTracker.registerData(MeganeuraEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final int NEAR_TARGET_FLAG = 2;
+    private static final int HAS_STUNG_FLAG = 4;
+    private static final int HAS_NECTAR_FLAG = 8;
+    int ticksSincePollination;
+    private int cannotEnterHiveTicks;
+    @Nullable
+    BlockPos flowerPos;
+    @Nullable
+    BlockPos hivePos;
+    private static final int field_30274 = 200;
+    int ticksLeftToFindHive;
+    private static final int field_30275 = 200;
+    int ticksUntilCanPollinate;
+    public static final String CROPS_GROWN_SINCE_POLLINATION_KEY = "CropsGrownSincePollination";
+    public static final String CANNOT_ENTER_HIVE_TICKS_KEY = "CannotEnterHiveTicks";
+    public static final String TICKS_SINCE_POLLINATION_KEY = "TicksSincePollination";
+    public static final String HAS_STUNG_KEY = "HasStung";
+    public static final String HAS_NECTAR_KEY = "HasNectar";
+    public static final String FLOWER_POS_KEY = "FlowerPos";
+    public static final String HIVE_POS_KEY = "HivePos";
+    private static final UniformIntProvider ANGER_TIME_RANGE = TimeHelper.betweenSeconds(20, 39);
+    @Nullable
+    private UUID angryAt;
+
+    public MeganeuraEntity(EntityType<? extends AnimalEntity> entityType, World world) {
         super(entityType, world);
-        this.moveControl = new FlightMoveControl(this, 10, false);
+        this.ticksUntilCanPollinate = MathHelper.nextInt(this.random, 20, 60);
+        this.moveControl = new FlightMoveControl(this, 20, true);
         this.lookControl = new BeeLookControl(this);
         this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, -1.0f);
-        this.ticksUntilCanPollinate = MathHelper.nextInt(this.random, 20, 60);
+        this.setPathfindingPenalty(PathNodeType.WATER, -1.0f);
+        this.setPathfindingPenalty(PathNodeType.WATER_BORDER, 16.0f);
+        this.setPathfindingPenalty(PathNodeType.COCOA, -1.0f);
+        this.setPathfindingPenalty(PathNodeType.FENCE, -1.0f);
     }
 
     public boolean hasEgg() {
@@ -222,34 +233,41 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         if (this.getWorld().isClient()) {
             setupAnimationStates();
         }
+        if (this.hasNectar() && this.getCropsGrownSincePollination() < 10 && this.random.nextFloat() < 0.05f) {
+            for (int i = 0; i < this.random.nextInt(2) + 1; ++i) {
+                this.addParticle(this.getWorld(),
+                        this.getX() - (double)0.3f, this.getX() + (double)0.3f,
+                        this.getZ() - (double)0.3f, this.getZ() + (double)0.3f,
+                        this.getBodyY(0.5), ParticleTypes.ITEM_SLIME);
+            }
+        }
+        this.updateBodyPitch();
     }
 
     @Override
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(0, new StingGoal(this, 1.4f, true));
         this.goalSelector.add(0, new MeganeuraAttackGoal(this, 1.15, true));
         this.goalSelector.add(1, new MateGoal(this, 1.0));
         this.goalSelector.add(1, new LayEggGoal(this, 1.0));
+        this.goalSelector.add(1, new EnterHiveGoal());
         this.goalSelector.add(2, new TemptGoal(this, 1.25, Ingredient.ofItems
                 (Items.PORKCHOP, Items.BEEF, Items.CHICKEN, Items.MUTTON, Items.RABBIT, ModItems.RAW_PRIMAL_MEAT), false));
-        this.goalSelector.add(2, new EnterHiveGoal());
         this.pollinateGoal = new PollinateGoal();
         this.goalSelector.add(3, this.pollinateGoal);
-        this.goalSelector.add(5, new FollowParentGoal(this, 1.1));
+        this.goalSelector.add(4, new FollowParentGoal(this, 1.1));
         this.goalSelector.add(5, new FindHiveGoal());
         this.moveToHiveGoal = new MoveToHiveGoal();
         this.goalSelector.add(5, this.moveToHiveGoal);
         this.moveToFlowerGoal = new MoveToFlowerGoal();
         this.goalSelector.add(6, this.moveToFlowerGoal);
-        this.goalSelector.add(7, new FlyOntoTreeGoal(this, 1.0));
-        this.goalSelector.add(8, new BeeWanderAroundGoal());
-        this.targetSelector.add(1, new MeganeuraRevengeGoal(this).setGroupRevenge(new Class[0]));
-        this.targetSelector.add(2, new StingTargetGoal(this));
-        this.targetSelector.add(3, new UniversalAngerGoal<MeganeuraEntity>(this, true));
-        //this.goalSelector.add(8, new FlyRandomlyGoal(this));
-        //this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
-        this.targetSelector.add(4, new ActiveTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, FOLLOW_PREDICATE));
+        //this.goalSelector.add(7, new GrowCropsGoal());
+        this.goalSelector.add(7, new BeeWanderAroundGoal());
+        this.goalSelector.add(8, new FlyOntoTreeGoal(this, 1.0));
+        this.targetSelector.add(1, new RevengeGoal(this).setGroupRevenge(DimorphEntity.class));
+        //this.goalSelector.add(5, new FlyRandomlyGoal(this));
+        //this.goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
+        this.targetSelector.add(2, new ActiveTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, FOLLOW_PREDICATE));
     }
 
     @Override
@@ -258,7 +276,7 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
     }
 
     public static DefaultAttributeContainer.Builder createMeganeuraAttributes() {
-        return BeeEntity.createMobAttributes()
+        return AnimalEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 12)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.7)
@@ -277,15 +295,10 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         return BREEDING_INGREDIENT.test(stack);
     }
 
-    boolean isFlowers(BlockPos pos) {
-        return this.getWorld().canSetBlock(pos) && this.getWorld().getBlockState(pos).isIn(BlockTags.LEAVES);
-    }
-
     @Nullable
     @Override
     public MeganeuraEntity createChild(ServerWorld world, PassiveEntity entity) {
         return ModEntities.MEGANEURA.create(world);
-        //return null;
     }
 
     @Override
@@ -308,18 +321,19 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         this.playSound(SoundEvents.ENTITY_CHICKEN_STEP, 0.15f, 1.0f);
     }
 
+    @Override
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(ATTACKING, false);
         this.dataTracker.startTracking(HAS_EGG, false);
         this.dataTracker.startTracking(DIGGING_DIRT, false);
         this.dataTracker.startTracking(BEE_FLAGS, (byte)0);
+        this.dataTracker.startTracking(ANGER, 0);
     }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putBoolean("HasEgg", this.hasEgg());
         if (this.hasHive()) {
             nbt.put(HIVE_POS_KEY, NbtHelper.fromBlockPos(this.getHivePos()));
         }
@@ -330,8 +344,9 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         nbt.putBoolean(HAS_STUNG_KEY, this.hasStung());
         nbt.putInt(TICKS_SINCE_POLLINATION_KEY, this.ticksSincePollination);
         nbt.putInt(CANNOT_ENTER_HIVE_TICKS_KEY, this.cannotEnterHiveTicks);
-        //nbt.putInt(CROPS_GROWN_SINCE_POLLINATION_KEY, this.cropsGrownSincePollination);
+        nbt.putInt(CROPS_GROWN_SINCE_POLLINATION_KEY, this.cropsGrownSincePollination);
         this.writeAngerToNbt(nbt);
+        nbt.putBoolean("HasEgg", this.hasEgg());
     }
 
     @Override
@@ -345,13 +360,13 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
             this.flowerPos = NbtHelper.toBlockPos(nbt.getCompound(FLOWER_POS_KEY));
         }
         super.readCustomDataFromNbt(nbt);
-        this.setHasEgg(nbt.getBoolean("HasEgg"));
         this.setHasNectar(nbt.getBoolean(HAS_NECTAR_KEY));
         this.setHasStung(nbt.getBoolean(HAS_STUNG_KEY));
         this.ticksSincePollination = nbt.getInt(TICKS_SINCE_POLLINATION_KEY);
         this.cannotEnterHiveTicks = nbt.getInt(CANNOT_ENTER_HIVE_TICKS_KEY);
-        //this.cropsGrownSincePollination = nbt.getInt(CROPS_GROWN_SINCE_POLLINATION_KEY);
+        this.cropsGrownSincePollination = nbt.getInt(CROPS_GROWN_SINCE_POLLINATION_KEY);
         this.readAngerFromNbt(this.getWorld(), nbt);
+        this.setHasEgg(nbt.getBoolean("HasEgg"));
     }
 
     //flying
@@ -405,18 +420,6 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         this.flapWings();
     }
 
-    private void setNearTarget(boolean nearTarget) {
-        this.setBeeFlag(NEAR_TARGET_FLAG, nearTarget);
-    }
-
-    private void setBeeFlag(int bit, boolean value) {
-        if (value) {
-            this.dataTracker.set(BEE_FLAGS, (byte)(this.dataTracker.get(BEE_FLAGS) | bit));
-        } else {
-            this.dataTracker.set(BEE_FLAGS, (byte)(this.dataTracker.get(BEE_FLAGS) & ~bit));
-        }
-    }
-
     private void flapWings() {
         this.prevFlapProgress = this.flapProgress;
         this.prevMaxWingDeviation = this.maxWingDeviation;
@@ -439,17 +442,6 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
-            return false;
-        }
-        if (!this.getWorld().isClient) {
-            this.pollinateGoal.cancel();
-        }
-        return super.damage(source, amount);
-    }
-
-    @Override
     protected void addFlapEffects() {
         this.playSound(SoundEvents.ENTITY_PARROT_FLY, 0.15f, 1.0f);
         this.field_28640 = this.speed + this.maxWingDeviation / 2.0f;
@@ -457,43 +449,6 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
 
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition) {
-    }
-
-    static class FlyRandomlyGoal
-            extends Goal {
-        private final MeganeuraEntity dragonfly;
-
-        public FlyRandomlyGoal(MeganeuraEntity dragonfly) {
-            this.dragonfly = dragonfly;
-            this.setControls(EnumSet.of(Control.MOVE));
-        }
-
-        @Override
-        public boolean canStart() {
-            double f;
-            double e;
-            MoveControl moveControl = this.dragonfly.getMoveControl();
-            if (!moveControl.isMoving()) {
-                return true;
-            }
-            double d = moveControl.getTargetX() - this.dragonfly.getX();
-            double g = d * d + (e = moveControl.getTargetY() - this.dragonfly.getY()) * e + (f = moveControl.getTargetZ() - this.dragonfly.getZ()) * f;
-            return g < 1.0 || g > 3600.0;
-        }
-
-        @Override
-        public boolean shouldContinue() {
-            return false;
-        }
-
-        @Override
-        public void start() {
-            Random random = this.dragonfly.getRandom();
-            double d = this.dragonfly.getX() + (double)((random.nextFloat() * 2.0f - 1.0f) * 16.0f);
-            double e = this.dragonfly.getY() + (double)((random.nextFloat() * 2.0f - 1.0f) * 16.0f);
-            double f = this.dragonfly.getZ() + (double)((random.nextFloat() * 2.0f - 1.0f) * 16.0f);
-            this.dragonfly.getMoveControl().moveTo(d, e, f, 1.0);
-        }
     }
 
     static class FlyOntoTreeGoal
@@ -624,13 +579,99 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         }
     }
 
-    //Bee goals
+    // Bee goals
+
+    int getCropsGrownSincePollination() {
+        return this.cropsGrownSincePollination;
+    }
+
+    private void addParticle(World world, double lastX, double x, double lastZ, double z, double y, ParticleEffect effect) {
+        world.addParticle(effect, MathHelper.lerp(world.random.nextDouble(), lastX, x), y, MathHelper.lerp(world.random.nextDouble(), lastZ, z),
+                0.0, 0.0, 0.0);
+    }
+
+    private void updateBodyPitch() {
+        this.lastPitch = this.currentPitch;
+        this.currentPitch = this.isNearTarget() ? Math.min(1.0f, this.currentPitch + 0.2f) : Math.max(0.0f, this.currentPitch - 0.24f);
+    }
+
+    private boolean isNearTarget() {
+        return this.getBeeFlag(NEAR_TARGET_FLAG);
+    }
+
+    public boolean hasNectar() {
+        return this.getBeeFlag(HAS_NECTAR_FLAG);
+    }
+
+    void setHasNectar(boolean hasNectar) {
+        if (hasNectar) {
+            this.resetPollinationTicks();
+        }
+        this.setBeeFlag(HAS_NECTAR_FLAG, hasNectar);
+    }
+
+    public void resetPollinationTicks() {
+        this.ticksSincePollination = 0;
+    }
+
+    private boolean getBeeFlag(int location) {
+        return (this.dataTracker.get(BEE_FLAGS) & location) != 0;
+    }
+
+    private void setBeeFlag(int bit, boolean value) {
+        if (value) {
+            this.dataTracker.set(BEE_FLAGS, (byte)(this.dataTracker.get(BEE_FLAGS) | bit));
+        } else {
+            this.dataTracker.set(BEE_FLAGS, (byte)(this.dataTracker.get(BEE_FLAGS) & ~bit));
+        }
+    }
+
+    public boolean hasStung() {
+        return this.getBeeFlag(HAS_STUNG_FLAG);
+    }
+
+    private void setHasStung(boolean hasStung) {
+        this.setBeeFlag(HAS_STUNG_FLAG, hasStung);
+    }
+
+    private void setNearTarget(boolean nearTarget) {
+        this.setBeeFlag(NEAR_TARGET_FLAG, nearTarget);
+    }
+
+    boolean isTooFar(BlockPos pos) {
+        return !this.isWithinDistance(pos, 32);
+    }
+
+    boolean isWithinDistance(BlockPos pos, int distance) {
+        return pos.isWithinDistance(this.getBlockPos(), (double)distance);
+    }
+
+    @Debug
+    public int getMoveGoalTicks() {
+        return Math.max(this.moveToHiveGoal.ticks, this.moveToFlowerGoal.ticks);
+    }
+
+    @Debug
+    public List<BlockPos> getPossibleHives() {
+        return this.moveToHiveGoal.possibleHives;
+    }
+
+    boolean isHiveValid() {
+        if (!this.hasHive()) {
+            return false;
+        }
+        if (this.isTooFar(this.hivePos)) {
+            return false;
+        }
+        BlockEntity blockEntity = this.getWorld().getBlockEntity(this.hivePos);
+        return blockEntity != null && blockEntity.getType() == ModBlockEntities.BUGHIVE;
+    }
 
     boolean canEnterHive() {
         if (this.cannotEnterHiveTicks > 0 || this.pollinateGoal.isRunning() || this.hasStung() || this.getTarget() != null) {
             return false;
         }
-        boolean bl = this.getWorld().isRaining() ||  this.hasNectar();
+        boolean bl = this.failedPollinatingTooLong() || this.getWorld().isRaining() || this.getWorld().isNight() || this.hasNectar();
         return bl && !this.isHiveNearFire();
     }
 
@@ -646,6 +687,10 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         return blockEntity instanceof MeganeuraHiveBlockEntity && ((MeganeuraHiveBlockEntity)blockEntity).isNearFire();
     }
 
+    private boolean failedPollinatingTooLong() {
+        return this.ticksSincePollination > 3600;
+    }
+
     private boolean doesHiveHaveSpace(BlockPos pos) {
         BlockEntity blockEntity = this.getWorld().getBlockEntity(pos);
         if (blockEntity instanceof MeganeuraHiveBlockEntity) {
@@ -654,12 +699,15 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         return false;
     }
 
-    boolean isWithinDistance(BlockPos pos, int distance) {
-        return pos.isWithinDistance(this.getBlockPos(), (double)distance);
+    @Debug
+    public boolean hasHive() {
+        return this.hivePos != null;
     }
 
-    boolean isTooFar(BlockPos pos) {
-        return !this.isWithinDistance(pos, 52);
+    @Nullable
+    @Debug
+    public BlockPos getHivePos() {
+        return this.hivePos;
     }
 
     void startMovingTo(BlockPos pos) {
@@ -687,38 +735,79 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         this.navigation.startMovingTo(vec3d2.x, vec3d2.y, vec3d2.z, 1.0);
     }
 
-    boolean isHiveValid() {
-        if (!this.hasHive()) {
-            return false;
+    @Nullable
+    public BlockPos getFlowerPos() {
+        return this.flowerPos;
+    }
+
+    public boolean hasFlower() {
+        return this.flowerPos != null;
+    }
+
+    public void setFlowerPos(BlockPos flowerPos) {
+        this.flowerPos = flowerPos;
+    }
+
+    boolean isFlowers(BlockPos pos) {
+        return this.getWorld().canSetBlock(pos) && this.getWorld().getBlockState(pos).isIn(BlockTags.FLOWERS);
+    }
+
+    void addCropCounter() {
+        ++this.cropsGrownSincePollination;
+    }
+
+    public void onHoneyDelivered() {
+        this.setHasNectar(false);
+        //this.resetCropCounter();
+    }
+
+    public void readAngerFromNbt(World world, NbtCompound nbt) {
+        this.setAngerTime(nbt.getInt(ANGER_TIME_KEY));
+        if (!(world instanceof ServerWorld)) {
+            return;
         }
-        if (this.isTooFar(this.hivePos)) {
-            return false;
+        if (!nbt.containsUuid(ANGRY_AT_KEY)) {
+            this.setAngryAt(null);
+            return;
         }
-        BlockEntity blockEntity = this.getWorld().getBlockEntity(this.hivePos);
-        return blockEntity != null && blockEntity.getType() == BlockEntityType.BEEHIVE;
-    }
-
-    public boolean hasNectar() {
-        return this.getBeeFlag(HAS_NECTAR_FLAG);
-    }
-
-    void setHasNectar(boolean hasNectar) {
-        if (hasNectar) {
-            this.resetPollinationTicks();
+        UUID uUID = nbt.getUuid(ANGRY_AT_KEY);
+        this.setAngryAt(uUID);
+        Entity entity = ((ServerWorld)world).getEntity(uUID);
+        if (entity == null) {
+            return;
         }
-        this.setBeeFlag(HAS_NECTAR_FLAG, hasNectar);
+        if (entity instanceof MobEntity) {
+            this.setAttacker((MobEntity)entity);
+        }
+        if (entity.getType() == EntityType.PLAYER) {
+            this.setAttacking((PlayerEntity)entity);
+        }
     }
 
-    public boolean hasStung() {
-        return this.getBeeFlag(HAS_STUNG_FLAG);
+    @Override
+    public int getAngerTime() {
+        return this.dataTracker.get(ANGER);
     }
 
-    private void setHasStung(boolean hasStung) {
-        this.setBeeFlag(HAS_STUNG_FLAG, hasStung);
+    @Override
+    public void setAngerTime(int angerTime) {
+        this.dataTracker.set(ANGER, angerTime);
     }
 
-    private boolean getBeeFlag(int location) {
-        return (this.dataTracker.get(BEE_FLAGS) & location) != 0;
+    @Override
+    @Nullable
+    public UUID getAngryAt() {
+        return this.angryAt;
+    }
+
+    @Override
+    public void setAngryAt(@Nullable UUID angryAt) {
+        this.angryAt = angryAt;
+    }
+
+    @Override
+    public void chooseRandomAngerTime() {
+        this.setAngerTime(ANGER_TIME_RANGE.get(this.random));
     }
 
     class BeeLookControl
@@ -741,23 +830,6 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         }
     }
 
-    class StingGoal
-            extends MeleeAttackGoal {
-        StingGoal(PathAwareEntity mob, double speed, boolean pauseWhenMobIdle) {
-            super(mob, speed, pauseWhenMobIdle);
-        }
-
-        @Override
-        public boolean canStart() {
-            return super.canStart() && MeganeuraEntity.this.hasAngerTime() && !MeganeuraEntity.this.hasStung();
-        }
-
-        @Override
-        public boolean shouldContinue() {
-            return super.shouldContinue() && MeganeuraEntity.this.hasAngerTime() && !MeganeuraEntity.this.hasStung();
-        }
-    }
-
     class EnterHiveGoal
             extends MeganeuraEntity.NotAngryGoal {
         EnterHiveGoal() {
@@ -770,8 +842,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
                     && MeganeuraEntity.this.hivePos.isWithinDistance(MeganeuraEntity.this.getPos(), 2.0)
                     && (blockEntity = MeganeuraEntity.this.getWorld().getBlockEntity(MeganeuraEntity.this.hivePos))
                     instanceof MeganeuraHiveBlockEntity) {
-                MeganeuraHiveBlockEntity dragonflyhiveBlockEntity = (MeganeuraHiveBlockEntity)blockEntity;
-                if (dragonflyhiveBlockEntity.isFullOfBees()) {
+                MeganeuraHiveBlockEntity dragonflyHiveBlockEntity = (MeganeuraHiveBlockEntity)blockEntity;
+                if (dragonflyHiveBlockEntity.isFullOfBees()) {
                     MeganeuraEntity.this.hivePos = null;
                 } else {
                     return true;
@@ -789,8 +861,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         public void start() {
             BlockEntity blockEntity = MeganeuraEntity.this.getWorld().getBlockEntity(MeganeuraEntity.this.hivePos);
             if (blockEntity instanceof MeganeuraHiveBlockEntity) {
-                MeganeuraHiveBlockEntity dragonflyhiveBlockEntity = (MeganeuraHiveBlockEntity)blockEntity;
-                dragonflyhiveBlockEntity.tryEnterHive(MeganeuraEntity.this, MeganeuraEntity.this.hasNectar());
+                MeganeuraHiveBlockEntity dragonflyHiveBlockEntity = (MeganeuraHiveBlockEntity)blockEntity;
+                dragonflyHiveBlockEntity.tryEnterHive(MeganeuraEntity.this, MeganeuraEntity.this.hasNectar());
             }
         }
     }
@@ -854,8 +926,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
 
         @Override
         public boolean canBeeStart() {
-            return MeganeuraEntity.this.hivePos != null && !MeganeuraEntity.this.hasPositionTarget() && MeganeuraEntity.this.canEnterHive()
-                    && !this.isCloseEnough(MeganeuraEntity.this.hivePos)
+            return MeganeuraEntity.this.hivePos != null && !MeganeuraEntity.this.hasPositionTarget()
+                    && MeganeuraEntity.this.canEnterHive() && !this.isCloseEnough(MeganeuraEntity.this.hivePos)
                     && MeganeuraEntity.this.getWorld().getBlockState(MeganeuraEntity.this.hivePos).isIn(BlockTags.BEEHIVES);
         }
 
@@ -957,7 +1029,7 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
     }
 
     public class MoveToFlowerGoal
-            extends NotAngryGoal {
+            extends MeganeuraEntity.NotAngryGoal {
         private static final int MAX_FLOWER_NAVIGATION_TICKS = 600;
         int ticks;
 
@@ -1016,6 +1088,67 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         }
     }
 
+    /*class GrowCropsGoal
+            extends MeganeuraEntity.NotAngryGoal {
+        static final int field_30299 = 30;
+
+        GrowCropsGoal() {
+        }
+
+        @Override
+        public boolean canBeeStart() {
+            if (MeganeuraEntity.this.getCropsGrownSincePollination() >= 10) {
+                return false;
+            }
+            if (MeganeuraEntity.this.random.nextFloat() < 0.3f) {
+                return false;
+            }
+            return MeganeuraEntity.this.hasNectar() && MeganeuraEntity.this.isHiveValid();
+        }
+
+        @Override
+        public boolean canBeeContinue() {
+            return this.canBeeStart();
+        }
+
+        @Override
+        public void tick() {
+            if (MeganeuraEntity.this.random.nextInt(this.getTickCount(30)) != 0) {
+                return;
+            }
+            for (int i = 1; i <= 2; ++i) {
+                BlockPos blockPos = MeganeuraEntity.this.getBlockPos().down(i);
+                BlockState blockState = MeganeuraEntity.this.getWorld().getBlockState(blockPos);
+                Block block = blockState.getBlock();
+                BlockState blockState2 = null;
+                if (!blockState.isIn(BlockTags.BEE_GROWABLES)) continue;
+                if (block instanceof CropBlock) {
+                    CropBlock cropBlock = (CropBlock)block;
+                    if (!cropBlock.isMature(blockState)) {
+                        blockState2 = cropBlock.withAge(cropBlock.getAge(blockState) + 1);
+                    }
+                } else if (block instanceof StemBlock) {
+                    j = blockState.get(StemBlock.AGE);
+                    if (j < 7) {
+                        blockState2 = blockState.with(StemBlock.AGE, j + 1);
+                    }
+                } else if (blockState.isOf(Blocks.SWEET_BERRY_BUSH)) {
+                    j = blockState.get(SweetBerryBushBlock.AGE);
+                    if (j < 3) {
+                        blockState2 = blockState.with(SweetBerryBushBlock.AGE, j + 1);
+                    }
+                } else if (blockState.isOf(Blocks.CAVE_VINES) || blockState.isOf(Blocks.CAVE_VINES_PLANT)) {
+                    ((Fertilizable) blockState.getBlock()).grow((ServerWorld)MeganeuraEntity.this.getWorld(),
+                            MeganeuraEntity.this.random, blockPos, blockState);
+                }
+                if (blockState2 == null) continue;
+                MeganeuraEntity.this.getWorld().syncWorldEvent(WorldEvents.PLANT_FERTILIZED, blockPos, 0);
+                MeganeuraEntity.this.getWorld().setBlockState(blockPos, blockState2);
+                MeganeuraEntity.this.addCropCounter();
+            }
+        }
+    }*/
+
     class BeeWanderAroundGoal
             extends Goal {
         private static final int MAX_DISTANCE = 22;
@@ -1038,7 +1171,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
         public void start() {
             Vec3d vec3d = this.getRandomLocation();
             if (vec3d != null) {
-                MeganeuraEntity.this.navigation.startMovingAlong(MeganeuraEntity.this.navigation.findPathTo(BlockPos.ofFloored(vec3d), 1), 1.0);
+                MeganeuraEntity.this.navigation.startMovingAlong(MeganeuraEntity.this.navigation.findPathTo(BlockPos.ofFloored(vec3d),
+                        1), 1.0);
             }
         }
 
@@ -1057,52 +1191,6 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
                 return vec3d3;
             }
             return NoPenaltySolidTargeting.find(MeganeuraEntity.this, 8, 4, -2, vec3d2.x, vec3d2.z, 1.5707963705062866);
-        }
-    }
-
-    class MeganeuraRevengeGoal
-            extends RevengeGoal {
-        MeganeuraRevengeGoal(MeganeuraEntity dragonfly) {
-            super(dragonfly, new Class[0]);
-        }
-
-        @Override
-        public boolean shouldContinue() {
-            return MeganeuraEntity.this.hasAngerTime() && super.shouldContinue();
-        }
-
-        @Override
-        protected void setMobEntityTarget(MobEntity mob, LivingEntity target) {
-            if (mob instanceof MeganeuraEntity && this.mob.canSee(target)) {
-                mob.setTarget(target);
-            }
-        }
-    }
-
-    static class StingTargetGoal
-            extends ActiveTargetGoal<PlayerEntity> {
-        StingTargetGoal(MeganeuraEntity dragonfly) {
-            super(dragonfly, PlayerEntity.class, 10, true, false, dragonfly::shouldAngerAt);
-        }
-
-        @Override
-        public boolean canStart() {
-            return this.canSting() && super.canStart();
-        }
-
-        @Override
-        public boolean shouldContinue() {
-            boolean bl = this.canSting();
-            if (!bl || this.mob.getTarget() == null) {
-                this.target = null;
-                return false;
-            }
-            return super.shouldContinue();
-        }
-
-        private boolean canSting() {
-            MeganeuraEntity dragonflyEntity = (MeganeuraEntity)this.mob;
-            return dragonflyEntity.hasAngerTime() && !dragonflyEntity.hasStung();
         }
     }
 
@@ -1127,7 +1215,7 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
     }
 
     class PollinateGoal
-            extends NotAngryGoal {
+            extends MeganeuraEntity.NotAngryGoal {
         private static final int field_30300 = 400;
         private static final int field_30301 = 20;
         private static final int field_30302 = 60;
@@ -1150,7 +1238,7 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
                 if (state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED).booleanValue()) {
                     return false;
                 }
-                if (state.isIn(BlockTags.LEAVES)) {
+                if (state.isIn(BlockTags.FLOWERS)) {
                     if (state.isOf(Blocks.SUNFLOWER)) {
                         return state.get(TallPlantBlock.HALF) == DoubleBlockHalf.UPPER;
                     }
@@ -1175,9 +1263,10 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
             Optional<BlockPos> optional = this.getFlower();
             if (optional.isPresent()) {
                 MeganeuraEntity.this.flowerPos = optional.get();
-                MeganeuraEntity.this.navigation.startMovingTo((double)MeganeuraEntity.this.flowerPos.getX() + 0.5,
-                                                                (double)MeganeuraEntity.this.flowerPos.getY() + 0.5,
-                                                                (double)MeganeuraEntity.this.flowerPos.getZ() + 0.5, 1.2f);
+                MeganeuraEntity.this.navigation.startMovingTo(
+                        (double)MeganeuraEntity.this.flowerPos.getX() + 0.5,
+                        (double)MeganeuraEntity.this.flowerPos.getY() + 0.5,
+                        (double)MeganeuraEntity.this.flowerPos.getZ() + 0.5, 1.2f);
                 return true;
             }
             MeganeuraEntity.this.ticksUntilCanPollinate = MathHelper.nextInt(MeganeuraEntity.this.random, 20, 60);
@@ -1267,8 +1356,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
                 boolean bl3;
                 boolean bl4 = bl3 = MeganeuraEntity.this.random.nextInt(25) == 0;
                 if (bl3) {
-                    this.nextTarget = new Vec3d(vec3d.getX() + (double)this.getRandomOffset(), vec3d.getY(),
-                                                vec3d.getZ() + (double)this.getRandomOffset());
+                    this.nextTarget = new Vec3d(vec3d.getX() + (double)this.getRandomOffset(), vec3d.getY(), vec3d.getZ()
+                            + (double)this.getRandomOffset());
                     MeganeuraEntity.this.navigation.stop();
                 } else {
                     bl2 = false;
@@ -1310,7 +1399,8 @@ public class MeganeuraEntity extends BeeEntity implements Angerable,
                         int n = l = k < j && k > -j ? j : 0;
                         while (l <= j) {
                             mutable.set(blockPos, k, i - 1, l);
-                            if (blockPos.isWithinDistance(mutable, searchDistance) && predicate.test(MeganeuraEntity.this.getWorld().getBlockState(mutable))) {
+                            if (blockPos.isWithinDistance(mutable, searchDistance)
+                                    && predicate.test(MeganeuraEntity.this.getWorld().getBlockState(mutable))) {
                                 return Optional.of(mutable);
                             }
                             l = l > 0 ? -l : 1 - l;

@@ -66,6 +66,7 @@ public class DimorphEntity extends TameableEntity implements Tameable {
         EntityType<?> entityType = entity.getType();
         return entityType == EntityType.CHICKEN ||
                 entityType == ModEntities.DODO ||
+                entityType == ModEntities.MEGANEURA ||
                 entityType == EntityType.RABBIT ||
                 entityType == EntityType.FROG;
     };

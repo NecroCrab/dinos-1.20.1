@@ -41,6 +41,10 @@ public class ModItems {
             new SpawnEggItem(ModEntities.BRONTO, 0x456296, 0x6E6E6E, new FabricItemSettings()));
     public static final Item MEGANEURA_SPAWN_EGG = registerItem( "meganeura_spawn_egg",
             new SpawnEggItem(ModEntities.MEGANEURA, 0x315234, 0xF9F9F9, new FabricItemSettings()));
+    public static final Item TRIKE_SPAWN_EGG = registerItem( "trike_spawn_egg",
+            new SpawnEggItem(ModEntities.TRIKE, 0x6E6E6E, 0x456296, new FabricItemSettings()));
+    public static final Item MOSA_SPAWN_EGG = registerItem( "mosa_spawn_egg",
+            new SpawnEggItem(ModEntities.MOSA, 0x223B4D, 0x799C65, new FabricItemSettings()));
 
     public static final Item RAW_PRIMAL_MEAT = registerItem("raw_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.RAW_PRIMAL_MEAT)));
     public static final Item COOKED_PRIMAL_MEAT = registerItem("cooked_primal_meat", new Item(new FabricItemSettings().food(ModFoodComponents.COOKED_PRIMAL_MEAT)));
@@ -82,6 +86,8 @@ public class ModItems {
         entries.add(MEGALANIA_SPAWN_EGG);
         entries.add(BRONTO_SPAWN_EGG);
         entries.add(MEGANEURA_SPAWN_EGG);
+        entries.add(TRIKE_SPAWN_EGG);
+        entries.add(MOSA_SPAWN_EGG);
     }
 
     public static void addItemsToNaturalItemGroup(FabricItemGroupEntries entries) {
@@ -97,6 +103,7 @@ public class ModItems {
         entries.add(ModBlocks.MEGALANIA_EGG_BLOCK);
         entries.add(ModBlocks.BRONTO_EGG_BLOCK);
         entries.add(ModBlocks.MEGANEURA_EGG_BLOCK);
+        entries.add(ModBlocks.TRIKE_EGG_BLOCK);
 
         entries.add(ModBlocks.MEGANEURA_HIVE_BLOCK);
 
@@ -105,6 +112,11 @@ public class ModItems {
         entries.add(ModBlocks.SILT_BLOCK);
 
         entries.add(ModBlocks.TRILOBITE_FOSSIL_BLOCK);
+        entries.add(ModBlocks.PLANT_FOSSIL_BLOCK);
+        entries.add(ModBlocks.AMBER_FOSSIL_BLOCK);
+        entries.add(ModBlocks.TREX_SKULL_BLOCK);
+        entries.add(ModBlocks.TRIKE_SKULL_BLOCK);
+        entries.add(ModBlocks.RAPTOR_CLAW_BLOCK);
     }
 
     private static Item registerItem(String name, Item item) {

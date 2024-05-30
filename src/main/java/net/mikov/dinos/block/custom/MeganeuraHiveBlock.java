@@ -1,9 +1,10 @@
 package net.mikov.dinos.block.custom;
 
+import net.mikov.dinos.block.entity.MeganeuraHiveBlockEntity;
+import net.mikov.dinos.block.entity.ModBlockEntities;
 import net.mikov.dinos.entity.custom.MeganeuraEntity;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
-import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -14,7 +15,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.passive.BeeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.entity.vehicle.TntMinecartEntity;
@@ -204,7 +204,7 @@ public class MeganeuraHiveBlock
     }
 
     private void addHoneyParticle(World world, double minX, double maxX, double minZ, double maxZ, double height) {
-        world.addParticle(ParticleTypes.DRIPPING_HONEY, MathHelper.lerp(world.random.nextDouble(),
+        world.addParticle(ParticleTypes.ITEM_SLIME, MathHelper.lerp(world.random.nextDouble(),
                 minX, maxX), height, MathHelper.lerp(world.random.nextDouble(), minZ, maxZ), 0.0, 0.0, 0.0);
     }
 
@@ -232,7 +232,7 @@ public class MeganeuraHiveBlock
     @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return world.isClient ? null : MeganeuraHiveBlock.checkType(type, BlockEntityType.BEEHIVE, BeehiveBlockEntity::serverTick);
+        return world.isClient ? null : MeganeuraHiveBlock.checkType(type, ModBlockEntities.BUGHIVE, MeganeuraHiveBlockEntity::serverTick);
     }
 
     @Override
@@ -250,7 +250,7 @@ public class MeganeuraHiveBlock
                 if (bl) {
                     nbtCompound = new NbtCompound();
                     nbtCompound.put("Bees", dragonflyHiveBlockEntity.getBees());
-                    BlockItem.setBlockEntityNbt(itemStack, BlockEntityType.BEEHIVE, nbtCompound);
+                    BlockItem.setBlockEntityNbt(itemStack, ModBlockEntities.BUGHIVE, nbtCompound);
                 }
                 nbtCompound = new NbtCompound();
                 nbtCompound.putInt("honey_level", i);

@@ -1,0 +1,6 @@
+{
+  "parent": "dinos:block/template_four_eggs",
+  "textures": {
+    "all": "dinos:block/trike_egg_slightly_cracked"
+  }
+}

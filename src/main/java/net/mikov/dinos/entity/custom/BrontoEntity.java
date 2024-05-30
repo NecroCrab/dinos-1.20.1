@@ -5,6 +5,7 @@ import net.mikov.dinos.block.custom.BrontoEggBlock;
 import net.mikov.dinos.block.custom.TrexEggBlock;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.ai.BrontoAttackGoal;
+import net.mikov.dinos.entity.ai.LargerAnimalMateGoal;
 import net.mikov.dinos.entity.ai.TrexAttackGoal;
 import net.mikov.dinos.item.ModItems;
 import net.mikov.dinos.sounds.ModSounds;
@@ -578,7 +579,7 @@ public class BrontoEntity extends AbstractDonkeyEntity
     // hatching
 
     static class MateGoal
-            extends AnimalMateGoal {
+            extends LargerAnimalMateGoal {
         private final BrontoEntity bronto;
 
         MateGoal(BrontoEntity bronto, double speed) {

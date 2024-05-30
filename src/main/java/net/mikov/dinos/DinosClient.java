@@ -1,10 +1,16 @@
 package net.mikov.dinos;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.mikov.dinos.block.ModBlocks;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.client.*;
+import net.mikov.dinos.gui.ModScreenHandlers;
+import net.mikov.dinos.gui.MountScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.client.render.RenderLayer;
 
 public class DinosClient implements ClientModInitializer {
     @Override
@@ -45,6 +51,16 @@ public class DinosClient implements ClientModInitializer {
 
         EntityRendererRegistry.register(ModEntities.MEGANEURA, MeganeuraRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(ModModelLayers.MEGANEURA, MeganeuraModel::getTexturedModelData);
+
+        EntityRendererRegistry.register(ModEntities.TRIKE, TrikeRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.TRIKE, TrikeModel::getTexturedModelData);
+
+        EntityRendererRegistry.register(ModEntities.MOSA, MosaRenderer::new);
+        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.MOSA, MosaModel::getTexturedModelData);
+
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.AMBER_FOSSIL_BLOCK, RenderLayer.getTranslucent());
+
+        //HandledScreens.register(ModScreenHandlers.MOUNT_SCREEN_HANDLER, MountScreen::new);
 
     }
 }

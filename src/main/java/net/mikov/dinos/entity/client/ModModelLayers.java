@@ -40,4 +40,10 @@ public class ModModelLayers {
 
     public static final EntityModelLayer MEGANEURA =
             new EntityModelLayer(new Identifier(Dinos.MOD_ID, "meganeura"), "main");
+
+    public static final EntityModelLayer TRIKE =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "trike"), "main");
+
+    public static final EntityModelLayer MOSA =
+            new EntityModelLayer(new Identifier(Dinos.MOD_ID, "mosa"), "main");
 }

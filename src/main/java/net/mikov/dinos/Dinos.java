@@ -4,8 +4,12 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.mikov.dinos.block.ModBlocks;
+import net.mikov.dinos.block.entity.ModBlockEntities;
 import net.mikov.dinos.entity.ModEntities;
 import net.mikov.dinos.entity.custom.*;
+import net.mikov.dinos.gui.ModScreenHandlers;
+import net.mikov.dinos.gui.MountScreen;
+import net.mikov.dinos.gui.MountScreenHandler;
 import net.mikov.dinos.item.ModItems;
 import net.mikov.dinos.sounds.ModSounds;
 import net.mikov.dinos.util.ModLootTableModifiers;
@@ -41,11 +45,15 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.MEGALANIA, MegalaniaEntity.createMegalaniaAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.BRONTO, BrontoEntity.createBrontoAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.MEGANEURA, MeganeuraEntity.createMeganeuraAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.TRIKE, TrikeEntity.createTrikeAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.MOSA, MosaEntity.createMosaAttributes());
 
 		ModWorldGen.generateWorldGen();
 		ModBlocks.registerModBlocks();
+		ModBlockEntities.registerBlockEntities();
 		ModItems.registerModItems();
 		ModSounds.registerSounds();
+		//ModScreenHandlers.registerScreenHandlers();
 		ModWorldOreGen.generateModWorldOres();
 		ModLootTableModifiers.modifyLootTables();
 	}

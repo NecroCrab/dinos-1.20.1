@@ -71,4 +71,14 @@ public class ModEntities {
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, MeganeuraEntity::new)
                     .dimensions(EntityDimensions.changing( 1f, 1f)).build());
 
+    public static final EntityType<TrikeEntity> TRIKE = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "trike"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TrikeEntity::new)
+                    .dimensions(EntityDimensions.changing( 2.5f, 2.75f)).build());
+
+    public static final EntityType<MosaEntity> MOSA = Registry.register(Registries.ENTITY_TYPE,
+            new Identifier(Dinos.MOD_ID, "mosa"),
+            FabricEntityTypeBuilder.create(SpawnGroup.WATER_CREATURE, MosaEntity::new)
+                    .dimensions(EntityDimensions.changing( 4f, 3f)).build());
+
 }

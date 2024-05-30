@@ -4,6 +4,8 @@ import net.mikov.dinos.entity.custom.DimorphEntity;
 import net.mikov.dinos.entity.custom.MeganeuraEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
@@ -84,5 +86,6 @@ public class MeganeuraAttackGoal extends MeleeAttackGoal {
         this.resetAttackCooldown();
         this.mob.swingHand(Hand.MAIN_HAND);
         this.mob.tryAttack(pEnemy);
+        pEnemy.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 120, 1));
     }
 }

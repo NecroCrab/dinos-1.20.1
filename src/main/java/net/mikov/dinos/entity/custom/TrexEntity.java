@@ -4,6 +4,7 @@ import net.mikov.dinos.block.ModBlocks;
 import net.mikov.dinos.block.custom.AnkyEggBlock;
 import net.mikov.dinos.block.custom.TrexEggBlock;
 import net.mikov.dinos.entity.ModEntities;
+import net.mikov.dinos.entity.ai.LargerAnimalMateGoal;
 import net.mikov.dinos.entity.ai.TrexAttackGoal;
 import net.mikov.dinos.item.ModItems;
 import net.minecraft.advancement.criterion.Criteria;
@@ -123,6 +124,7 @@ public class TrexEntity extends AbstractDonkeyEntity
                 entityType == ModEntities.CERATO ||
                 entityType == ModEntities.DIMORPH ||
                 entityType == ModEntities.BRONTO ||
+                entityType == ModEntities.TRIKE ||
                 entityType == EntityType.PIG;
     };
 
@@ -274,11 +276,11 @@ public class TrexEntity extends AbstractDonkeyEntity
         return AbstractDonkeyEntity.createBaseHorseAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 80)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 16)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 0.2)
                 .add(EntityAttributes.GENERIC_ARMOR, 5)
-                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 6)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 4)
+                .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 4)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 6)
                 .add(EntityAttributes.HORSE_JUMP_STRENGTH, 0.5)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 40);
 
@@ -632,7 +634,7 @@ public class TrexEntity extends AbstractDonkeyEntity
     // hatching
 
     static class MateGoal
-            extends AnimalMateGoal {
+            extends LargerAnimalMateGoal {
         private final TrexEntity trex;
 
         MateGoal(TrexEntity trex, double speed) {

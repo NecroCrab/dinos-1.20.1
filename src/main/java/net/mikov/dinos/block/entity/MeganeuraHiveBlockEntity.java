@@ -1,17 +1,16 @@
-package net.mikov.dinos.block.custom;
+package net.mikov.dinos.block.entity;
 
 import com.google.common.collect.Lists;
+import net.mikov.dinos.block.custom.MeganeuraHiveBlock;
 import net.mikov.dinos.entity.custom.MeganeuraEntity;
 import net.minecraft.block.BeehiveBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.FireBlock;
-import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.BeeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -19,7 +18,6 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.EntityTypeTags;
-import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.annotation.Debug;
@@ -52,7 +50,7 @@ public class MeganeuraHiveBlockEntity
     private BlockPos flowerPos;
 
     public MeganeuraHiveBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityType.BEEHIVE, pos, state);
+        super(ModBlockEntities.BUGHIVE, pos, state);
     }
 
     @Override
@@ -163,7 +161,7 @@ public class MeganeuraHiveBlockEntity
         MeganeuraHiveBlockEntity.removeIrrelevantNbtKeys(nbtCompound);
         nbtCompound.put("HivePos", NbtHelper.fromBlockPos(pos));
         nbtCompound.putBoolean("NoGravity", true);
-        Direction direction = state.get(BeehiveBlock.FACING);
+        Direction direction = state.get(MeganeuraHiveBlock.FACING);
         BlockPos blockPos = pos.offset(direction);
         boolean bl2 = bl = !world.getBlockState(blockPos).getCollisionShape(world, blockPos).isEmpty();
         if (bl && beeState != MeganeuraHiveBlockEntity.BeeState.EMERGENCY) {
@@ -216,7 +214,7 @@ public class MeganeuraHiveBlockEntity
         }
     }
 
-    private static void ageBee(int ticks, BeeEntity bee) {
+    private static void ageBee(int ticks, MeganeuraEntity bee) {
         int i = bee.getBreedingAge();
         if (i < 0) {
             bee.setBreedingAge(Math.min(0, i + ticks));

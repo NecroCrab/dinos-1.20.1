@@ -1,6 +1,7 @@
 package net.mikov.dinos.gui;
 
-import net.mikov.dinos.entity.custom.TrexEntity;
+import net.mikov.dinos.entity.custom.AbstractMosaEntity;
+import net.mikov.dinos.entity.custom.MosaEntity;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -15,10 +16,10 @@ import net.minecraft.screen.slot.Slot;
 public class MountScreenHandler
         extends ScreenHandler {
     private final Inventory inventory;
-    private final AbstractHorseEntity entity;
+    private final AbstractMosaEntity entity;
 
-    public MountScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, final AbstractHorseEntity entity) {
-        super(null, syncId);
+    public MountScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, final AbstractMosaEntity entity) {
+        super(/*ModScreenHandlers.MOUNT_SCREEN_HANDLER,*/ null, syncId);
         int l;
         int k;
         this.inventory = inventory;
@@ -57,8 +58,8 @@ public class MountScreenHandler
         });
         if (this.hasChest(entity)) {
             for (k = 0; k < 3; ++k) {
-                for (l = 0; l < ((TrexEntity)entity).getInventoryColumns(); ++l) {
-                    this.addSlot(new Slot(inventory, 2 + l + k * ((TrexEntity)entity).getInventoryColumns(), 80 + l * 18, 18 + k * 18));
+                for (l = 0; l < ((AbstractMosaEntity)entity).getInventoryColumns(); ++l) {
+                    this.addSlot(new Slot(inventory, 2 + l + k * ((AbstractMosaEntity)entity).getInventoryColumns(), 80 + l * 18, 18 + k * 18));
                 }
             }
         }
@@ -77,8 +78,8 @@ public class MountScreenHandler
         return !this.entity.areInventoriesDifferent(this.inventory) && this.inventory.canPlayerUse(player) && this.entity.isAlive() && this.entity.distanceTo(player) < 8.0f;
     }
 
-    private boolean hasChest(AbstractHorseEntity trex) {
-        return trex instanceof TrexEntity && ((TrexEntity)trex).hasChest();
+    private boolean hasChest(AbstractMosaEntity mosa) {
+        return mosa instanceof AbstractMosaEntity && ((AbstractMosaEntity)mosa).hasChest();
     }
 
     @Override

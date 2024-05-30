@@ -91,6 +91,7 @@ public class PiranhaEntity extends AnimalEntity implements Bucketable {
                 entityType == EntityType.WITCH ||
                 entityType == ModEntities.DODO ||
                 entityType == ModEntities.ANKY ||
+                entityType == ModEntities.TRIKE ||
                 entityType == ModEntities.TREX ||
                 entityType == ModEntities.TRILOBITE ||
                 entityType == ModEntities.COMPY ||

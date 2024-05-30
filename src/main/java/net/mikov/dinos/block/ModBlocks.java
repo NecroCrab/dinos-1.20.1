@@ -40,6 +40,8 @@ public class ModBlocks {
             new BrontoEggBlock(FabricBlockSettings.copyOf(Blocks.SNIFFER_EGG)));
     public static final Block MEGANEURA_EGG_BLOCK = registerBlock( "meganeura_egg_block",
             new MeganeuraEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
+    public static final Block TRIKE_EGG_BLOCK = registerBlock( "trike_egg_block",
+            new TrikeEggBlock(FabricBlockSettings.copyOf(Blocks.TURTLE_EGG)));
 
     public static final Block MEGANEURA_HIVE_BLOCK = registerBlock( "meganeura_hive_block",
             new MeganeuraHiveBlock(FabricBlockSettings.copyOf(Blocks.BEEHIVE)));
@@ -55,7 +57,17 @@ public class ModBlocks {
             new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).requiresTool().strength(1.0f, 1.0f), UniformIntProvider.create(3, 7)));
 
     public static final Block TRILOBITE_FOSSIL_BLOCK = registerBlock( "trilobite_fossil_block",
+            new Block(FabricBlockSettings.copyOf(Blocks.PINK_PETALS).nonOpaque()));
+    public static final Block PLANT_FOSSIL_BLOCK = registerBlock( "plant_fossil_block",
+            new Block(FabricBlockSettings.copyOf(Blocks.PINK_PETALS).nonOpaque()));
+    public static final Block AMBER_FOSSIL_BLOCK = registerBlock( "amber_fossil_block",
+            new GlassBlock(FabricBlockSettings.copyOf(Blocks.GLASS).nonOpaque()));
+    public static final Block TREX_SKULL_BLOCK = registerBlock( "trex_skull_block",
             new Block(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).nonOpaque()));
+    public static final Block TRIKE_SKULL_BLOCK = registerBlock( "trike_skull_block",
+            new Block(FabricBlockSettings.copyOf(Blocks.BONE_BLOCK).nonOpaque()));
+    public static final Block RAPTOR_CLAW_BLOCK = registerBlock( "raptor_claw_block",
+            new Block(FabricBlockSettings.copyOf(Blocks.PINK_PETALS).nonOpaque()));
 
     private static Block registerBlock(String name, Block block) {
         registerBlockItem(name, block);
