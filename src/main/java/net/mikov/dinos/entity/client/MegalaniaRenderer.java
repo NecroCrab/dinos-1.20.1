@@ -13,7 +13,7 @@ public class MegalaniaRenderer extends MobEntityRenderer<MegalaniaEntity, Megala
     private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/megalania_texture.png");
 
     public MegalaniaRenderer(EntityRendererFactory.Context context) {
-        super(context, new MegalaniaModel(context.getPart(ModModelLayers.MEGALANIA)), 1f);
+        super(context, new MegalaniaModel<>(context.getPart(ModModelLayers.MEGALANIA)), 1f);
     }
 
     @Override
