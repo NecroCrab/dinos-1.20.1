@@ -44,9 +44,9 @@ public class Dinos implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(ModEntities.PIRANHA, PiranhaEntity.createPiranhaAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.MEGALANIA, MegalaniaEntity.createMegalaniaAttributes());
 		FabricDefaultAttributeRegistry.register(ModEntities.BRONTO, BrontoEntity.createBrontoAttributes());
-		FabricDefaultAttributeRegistry.register(ModEntities.MEGANEURA, MeganeuraEntity.createMeganeuraAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.MEGANEURA, MeganeuraEntity.createMeganeuraAttributes()); // add hive functionality
 		FabricDefaultAttributeRegistry.register(ModEntities.TRIKE, TrikeEntity.createTrikeAttributes());
-		FabricDefaultAttributeRegistry.register(ModEntities.MOSA, MosaEntity.createMosaAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.MOSA, MosaEntity.createMosaAttributes()); // movecontrols, inventory screen, spawning
 
 		ModWorldGen.generateWorldGen();
 		ModBlocks.registerModBlocks();

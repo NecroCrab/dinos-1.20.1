@@ -9,7 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class TrexRenderer extends MobEntityRenderer<TrexEntity, TrexModel<TrexEntity>> {
-    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/trex_texture.png");
+    private static final Identifier TEXTURE = new Identifier(Dinos.MOD_ID, "textures/entity/trex_texture_new.png");
 
     public TrexRenderer(EntityRendererFactory.Context context) {
         super(context, new TrexModel<>(context.getPart(ModModelLayers.TREX)), 2f);
